@@ -38,6 +38,11 @@ dependencies:
   carousel_slider: ^5.0.0
   smooth_page_indicator: ^1.2.1
   skeletonizer: ^1.4.3
+  font_awesome_flutter: ^10.8.0
+  firebase_core: ^3.13.0
+  cloud_firestore: ^5.6.7
+  intl: ^0.20.2
+  inner_shadow_widget: ^0.0.3
 
 dev_dependencies:
   flutter_test:
