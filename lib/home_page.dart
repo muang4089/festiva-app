@@ -310,18 +310,21 @@ class RecmdListCard extends StatelessWidget {
               padding: EdgeInsets.only(bottom: 0.5),
               margin: EdgeInsets.only(left: 16),
               constraints: BoxConstraints(
-                minHeight: 81
+                minHeight: 88
               ),
               // height: 90,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    cardData["title"],
-                    style: TextStyle(
-                      fontSize: 16.5,
-                      fontVariations: <FontVariation>[FontVariation("wght", 700)],
+                  SizedBox(
+                    height: 27.6,
+                    child: Text(
+                      cardData["title"],
+                      style: TextStyle(
+                        fontSize: 16.5,
+                        fontVariations: <FontVariation>[FontVariation("wght", 700)],
+                      ),
                     ),
                   ),
                   Text(
@@ -330,7 +333,7 @@ class RecmdListCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       fontSize: 12.5,
                       color: greyColor1,
-                      fontVariations: <FontVariation>[FontVariation("wght", 560)],
+                      fontVariations: <FontVariation>[FontVariation("wght", 500)],
                     ),
                   ),
                   Text(
@@ -340,7 +343,7 @@ class RecmdListCard extends StatelessWidget {
                       fontSize: 12.5,
                       color: greyColor1,
                       fontVariations: <FontVariation>[
-                        FontVariation("wght", 520),
+                        FontVariation("wght", 500),
                       ],
                     ),
                   ),
@@ -350,7 +353,7 @@ class RecmdListCard extends StatelessWidget {
                       fontSize: 12.5,
                       color: orangeColor2,
                       // backgroundColor: Colors.amber,
-                      fontVariations: <FontVariation>[FontVariation("wght", 560)],
+                      fontVariations: <FontVariation>[FontVariation("wght", 450)],
                     ),
                   ),
                 ],
