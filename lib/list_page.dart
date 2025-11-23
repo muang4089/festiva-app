@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,8 +8,9 @@ import 'package:intl/intl.dart';
 void printLog(e) {
   debugPrint(e.toString());
 }
-// final today = DateFormat("yyyy.MM.dd").format(DateTime.now());
-final today = DateFormat("yyyy.MM.dd").format(DateTime.parse("20250529"));
+final today = DateFormat("yyyy.MM.dd").format(DateTime.now());
+// final today = DateFormat("yyyy.MM.dd").format(DateTime.parse("20250529"));
+final FirebaseFirestore _firebase = FirebaseFirestore.instance;
 
 class ListPage extends StatefulWidget {
   const ListPage({super.key});
@@ -18,7 +20,6 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<ListPage> {
-  final FirebaseFirestore _firebase = FirebaseFirestore.instance;
   final listScrollCtrl = ScrollController();
   List<Map> globalFestivals = [];
   var docCount;
@@ -66,7 +67,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
             stateMsg = "개최 중";
             textColor = Color.fromARGB(255, 206, 44, 82);
           } else if (state == 2) {
-            stateMsg = "종료";
+            stateMsg = " 종료 ";
             textColor = Color.fromARGB(255, 129, 129, 129);
           }
           festival.add({
@@ -77,7 +78,8 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
             "end_date": endDate,
             "price": doc["price"],
             "state": stateMsg,
-            "color": textColor
+            "color": textColor,
+            "id": doc["contentid"]
           });
           lastdocId = doc["contentid"];
           // printLog(festival);
@@ -193,112 +195,122 @@ class ListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.035,
-      ),
-      // color: Colors.amber,
-      // width: 80,
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              festivaData["img"],
-              height: 212,
-              width: double.maxFinite,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/img_error.jpg',
-                  height: 212,
-                  width: double.maxFinite,
-                  fit: BoxFit.cover,
-                );
-              },
+    return InkWell(
+      splashColor: const Color.fromARGB(255, 243, 243, 243),
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) => DetailPage(mainData: festivaData, firebase: _firebase,)
+          )
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.fromLTRB(0, 22, 0, 22),
+        padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.035,
+        ),
+        // color: Colors.amber,
+        // width: 80,
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                festivaData["img"],
+                height: 212,
+                width: double.maxFinite,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/img_error.jpg',
+                    height: 212,
+                    width: double.maxFinite,
+                    fit: BoxFit.cover,
+                  );
+                },
+              ),
             ),
-          ),
-          SizedBox(height: 7.5),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Container(
-                  constraints: BoxConstraints(minHeight: 93,maxWidth: double.maxFinite),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        festivaData["title"],
-                        style: TextStyle(
-                          fontSize: 19,
-                          overflow: TextOverflow.clip,
-                          // color: const Color.fromARGB(255, 0, 0, 0),
-                          fontVariations: <FontVariation>[
-                            const FontVariation('wght', 720),
-                          ],
+            SizedBox(height: 7.5),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Container(
+                    constraints: BoxConstraints(minHeight: 98,maxWidth: double.maxFinite),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          festivaData["title"],
+                          style: TextStyle(
+                            fontSize: 19.5,
+                            overflow: TextOverflow.clip,
+                            // color: const Color.fromARGB(255, 0, 0, 0),
+                            fontVariations: <FontVariation>[
+                              const FontVariation('wght', 720),
+                            ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        festivaData["locate"],
-                        style: TextStyle(
-                          overflow: TextOverflow.ellipsis,
-                          fontSize: 13.5,
-                          color: greyColor1,
-                          fontVariations: <FontVariation>[
-                            FontVariation("wght", 500),
-                          ],
+                        Text(
+                          festivaData["locate"],
+                          style: TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            fontSize: 13.5,
+                            color: greyColor1,
+                            fontVariations: <FontVariation>[
+                              FontVariation("wght", 500),
+                            ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        "${festivaData["start_date"]} ~ ${festivaData["end_date"]}",
-                        style: TextStyle(
-                          overflow: TextOverflow.ellipsis,
-                          fontSize: 13.5,
-                          color: greyColor1,
-                          fontVariations: <FontVariation>[
-                            FontVariation("wght", 490),
-                          ],
+                        Text(
+                          "${festivaData["start_date"]} ~ ${festivaData["end_date"]}",
+                          style: TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            fontSize: 13.5,
+                            color: greyColor1,
+                            fontVariations: <FontVariation>[
+                              FontVariation("wght", 460),
+                            ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        festivaData["price"],
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          color: orangeColor2,
-                          // backgroundColor: Colors.amber,
-                          fontVariations: <FontVariation>[
-                            FontVariation("wght", 450),
-                          ],
+                        Text(
+                          festivaData["price"],
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            color: orangeColor2,
+                            // backgroundColor: Colors.amber,
+                            fontVariations: <FontVariation>[
+                              FontVariation("wght", 450),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: 2.5),
-                padding: EdgeInsets.fromLTRB(8, 1, 8, 1),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: festivaData["color"]),
-                  borderRadius: BorderRadius.circular(11),
-                ),
-                child: Text(
-                  festivaData["state"],
-                  style: TextStyle(
-                    fontSize: 13.4,
-                    color: festivaData["color"],
-                    // backgroundColor: Colors.amber,
-                    fontVariations: <FontVariation>[FontVariation("wght", 610)],
+                Container(
+                  margin: EdgeInsets.only(top: 2.5),
+                  padding: EdgeInsets.fromLTRB(8, 1, 8, 1),
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: festivaData["color"]),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Text(
+                    festivaData["state"],
+                    style: TextStyle(
+                      fontSize: 13.4,
+                      color: festivaData["color"],
+                      // backgroundColor: Colors.amber,
+                      fontVariations: <FontVariation>[FontVariation("wght", 610)],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 44),
-        ],
+              ],
+            ),
+            // SizedBox(height: 44),
+          ],
+        ),
       ),
     );
   }

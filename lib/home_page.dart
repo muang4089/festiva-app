@@ -334,12 +334,12 @@ class RecmdListCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    height: 27.6,
+                    height: 27.8,
                     child: Text(
                       cardData["title"],
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 16.5,
+                        fontSize: 16.6,
                         fontVariations: <FontVariation>[
                           FontVariation("wght", 700),
                         ],
@@ -351,9 +351,9 @@ class RecmdListCard extends StatelessWidget {
                     style: TextStyle(
                       overflow: TextOverflow.ellipsis,
                       fontSize: 12.5,
-                      color: greyColor1,
+                      color: const Color.fromARGB(255, 58, 58, 58),
                       fontVariations: <FontVariation>[
-                        FontVariation("wght", 500),
+                        FontVariation("wght", 450),
                       ],
                     ),
                   ),
@@ -362,9 +362,9 @@ class RecmdListCard extends StatelessWidget {
                     style: TextStyle(
                       // overflow: TextOverflow.ellipsis,
                       fontSize: 12.5,
-                      color: greyColor1,
+                      color: const Color.fromARGB(255, 58, 58, 58),
                       fontVariations: <FontVariation>[
-                        FontVariation("wght", 500),
+                        FontVariation("wght", 450),
                       ],
                     ),
                   ),
