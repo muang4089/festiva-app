@@ -10,7 +10,13 @@ import 'package:festiva/list_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // await windowManager.ensureInitialized();
+  // windowManager.setSize(const Size(512, 1109));
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(Pages());
 }
 

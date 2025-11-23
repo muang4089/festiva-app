@@ -63,4 +63,6 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.festiva',
   );
 
+  static FirebaseOptions? get web => null;
+
 }

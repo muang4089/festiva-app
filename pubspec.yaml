@@ -37,12 +37,13 @@ dependencies:
   flutter_svg: ^2.1.0
   carousel_slider: ^5.0.0
   smooth_page_indicator: ^1.2.1
-  skeletonizer: ^1.4.3
+  skeletonizer: ^2.1.0+1
   font_awesome_flutter: ^10.8.0
-  firebase_core: ^3.13.0
-  cloud_firestore: ^5.6.7
+  firebase_core: ^3.15.2
+  cloud_firestore: ^5.6.12
   intl: ^0.20.2
   inner_shadow_widget: ^0.0.3
+  window_manager: ^0.5.1
 
 dev_dependencies:
   flutter_test:
