@@ -1,9 +1,8 @@
-import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'home_page.dart';
 
 void printLog(e) {
   debugPrint(e.toString());
@@ -29,7 +28,7 @@ class _DetailPageState extends State<DetailPage> {
     firebase = widget.firebase;
   }
   Future<dynamic> getDetailData() async {
-    var detailData = await firebase.collection("festivals_detail_data").doc(mainData["id"]).get();
+    var detailData = await firebase.collection(targetDatabases["detail_db"]).doc(mainData["id"]).get();
     printLog(detailData["sponsor1tel"]);
     return detailData;
   }
@@ -75,7 +74,7 @@ class _DetailPageState extends State<DetailPage> {
                           fontSize: 23.9,
                           color: Colors.black,
                           fontVariations: <FontVariation>[
-                            const FontVariation('wght', 750),
+                            const FontVariation('wght', 700),
                           ],
                         )),
                         Container(
@@ -84,24 +83,24 @@ class _DetailPageState extends State<DetailPage> {
                             fontSize: 14.5,
                             color: Color(0xff313131),
                             fontVariations: <FontVariation>[
-                              const FontVariation('wght', 550),
+                              const FontVariation('wght', 500),
                             ],
                           )),
                         ),
                         Divider(thickness: 1, color: Color(0xffAFAFAF),indent: 9,endIndent: 9,),
                         Container(
-                          margin: EdgeInsets.fromLTRB(0, 13, 0, 13.5),
+                          margin: EdgeInsets.fromLTRB(0, 16, 0, 14.5),
                           child: Row(
                             children: [
-                              FaIcon(FontAwesomeIcons.solidCalendar, color: orangeColor1, size: 20.4),
+                              FaIcon(FontAwesomeIcons.solidCalendar, color: orangeColor1, size: 21.5),
                               Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.fromLTRB(11.5, 0, 0, 0),
+                                  margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
                                   child: Text("2025.04.13 ~ 2025.05.23",style: TextStyle (
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 500),
+                                      const FontVariation('wght', 440),
                                     ],
                                   )),
                                 ),
@@ -110,19 +109,19 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(bottom: 13.5),
+                          margin: EdgeInsets.only(bottom: 14.5),
                           child: Row(
                             children: [
-                              FaIcon(FontAwesomeIcons.solidClock, color: orangeColor1, size: 18.5),
+                              FaIcon(FontAwesomeIcons.solidClock, color: orangeColor1, size: 19.5),
                               Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.fromLTRB(11.5, 0, 0, 0),
+                                  margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
                                   child: Text("10:00~21:00(과학체험부스10:00~19:00 / 별음악회, 시낭송: 19:00~21:00)",style: TextStyle (
                                     height: 1.3,
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 500),
+                                      const FontVariation('wght', 440),
                                     ],
                                   )),
                                 ),
@@ -131,18 +130,18 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(bottom: 13.5),
+                          margin: EdgeInsets.only(bottom: 14.5),
                           child: Row(
                             children: [
-                              FaIcon(FontAwesomeIcons.wonSign, color: orangeColor1, size: 18.5),
+                              FaIcon(FontAwesomeIcons.wonSign, color: orangeColor1, size: 19),
                               Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.fromLTRB(11.5, 0, 0, 0),
+                                  margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
                                   child: Text("부분 유료",style: TextStyle (
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 500),
+                                      const FontVariation('wght', 440),
                                     ],
                                   )),
                                 ),
@@ -155,15 +154,15 @@ class _DetailPageState extends State<DetailPage> {
                           margin: EdgeInsets.only(bottom: 10),
                           child: Row(
                             children: [
-                              FaIcon(FontAwesomeIcons.locationDot, color: orangeColor1, size: 24,),
+                              FaIcon(FontAwesomeIcons.locationDot, color: orangeColor1, size: 25,),
                               Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.fromLTRB(11.5, 0, 0, 0),
+                                  margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
                                   child: Text("경상남도 고성군 당항만로 1116 당항포관광지",style: TextStyle (
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 500),
+                                      const FontVariation('wght', 440),
                                     ],
                                   )),
                                 ),

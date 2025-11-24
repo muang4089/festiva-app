@@ -8,6 +8,12 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+Map targetDatabases = {
+  "main_db": "",
+  "detail_db": "",
+  "titles_db": ""
+};
+
 void printLog(e) {
   debugPrint(e.toString());
 }
@@ -19,15 +25,24 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with AutomaticKeepAliveClientMixin<HomePage> {
+class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
   final FirebaseFirestore _firebase = FirebaseFirestore.instance;
 
   @override
   bool get wantKeepAlive => true;
 
+  Future<Map> databaseSet() async {
+    await _firebase.collection('APP_DATA').doc("running_databases").get().then((snapshot) {
+      targetDatabases["main_db"] = "festivals_main_data_${snapshot.data()?['main']}";
+      targetDatabases["detail_db"] = "festivals_detail_data_${snapshot.data()?['detail']}";
+      targetDatabases["titles_db"] = "titles_${snapshot.data()?['titles']}";
+      printLog(targetDatabases);
+    });
+    return getRecmdData();
+  }
+
   getRecmdList() async {
-    //var docLength;
+    
     List<List> preIds = [];
     List<String> listTitles = [];
     try {
@@ -62,7 +77,7 @@ class _HomePageState extends State<HomePage>
       list = [];
       for (var _id in recmdListData["pre_ids"][i]) {
         await _firebase
-            .collection("festivals_main_data")
+            .collection(targetDatabases["main_db"])
             .doc(_id.toString())
             .get()
             .then((doc) {
@@ -98,7 +113,7 @@ class _HomePageState extends State<HomePage>
           // snap: true,
         ),
         FutureBuilder(
-          future: getRecmdData(),
+          future: databaseSet(),
           builder: (context, snapshot) {
             return SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -264,8 +279,8 @@ class _CarouselState extends State<Carousel> {
           options: CarouselOptions(
             height: 326,
             viewportFraction: 0.825,
-            autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 4),
+            autoPlay: false,
+            // autoPlayInterval: const Duration(seconds: 4),
             onPageChanged: (index, reason) {
               setState(() {
                 _current = index;
