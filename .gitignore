@@ -46,3 +46,4 @@ app.*.map.json
 
 /assets/config/.env
 /android/app/google-services.json
+/node_modules
