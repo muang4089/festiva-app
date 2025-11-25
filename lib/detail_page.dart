@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:kakao_map_sdk/kakao_map_sdk.dart';
 import 'home_page.dart';
 
 void printLog(e) {
@@ -27,10 +31,11 @@ class _DetailPageState extends State<DetailPage> {
     mainData = widget.mainData;
     firebase = widget.firebase;
   }
-  Future<dynamic> getDetailData() async {
+  Future<Map> getDetailData() async {
     var detailData = await firebase.collection(targetDatabases["detail_db"]).doc(mainData["id"]).get();
-    printLog(detailData["sponsor1tel"]);
-    return detailData;
+    printLog(detailData.data());
+    
+    return detailData.data();
   }
   @override
   Widget build(BuildContext context) {
@@ -70,7 +75,7 @@ class _DetailPageState extends State<DetailPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("경남고성공룡세계엑스포",style: TextStyle (
+                        Text(mainData["title"],style: TextStyle (
                           fontSize: 23.9,
                           color: Colors.black,
                           fontVariations: <FontVariation>[
@@ -78,8 +83,8 @@ class _DetailPageState extends State<DetailPage> {
                           ],
                         )),
                         Container(
-                          margin: EdgeInsets.fromLTRB(2, 3.3, 0, 15),
-                          child: Text("경남 고성군 | (재)고성문화관광재단",style: TextStyle (
+                          margin: EdgeInsets.fromLTRB(2, 3.3, 0, 13),
+                          child: Text("${snapshot.data?["sponsor1"]} ${!snapshot.data?["sponsor2"].trim().isEmpty ? '|' : ''} ${snapshot.data?["sponsor2"]}",style: TextStyle (
                             fontSize: 14.5,
                             color: Color(0xff313131),
                             fontVariations: <FontVariation>[
@@ -89,18 +94,19 @@ class _DetailPageState extends State<DetailPage> {
                         ),
                         Divider(thickness: 1, color: Color(0xffAFAFAF),indent: 9,endIndent: 9,),
                         Container(
-                          margin: EdgeInsets.fromLTRB(0, 16, 0, 14.5),
+                          margin: EdgeInsets.fromLTRB(0, 16, 0, 15),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               FaIcon(FontAwesomeIcons.solidCalendar, color: orangeColor1, size: 21.5),
                               Expanded(
                                 child: Container(
                                   margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
-                                  child: Text("2025.04.13 ~ 2025.05.23",style: TextStyle (
+                                  child: Text("${mainData["start_date"]} ~ ${mainData["end_date"]}",style: TextStyle (
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 440),
+                                      const FontVariation('wght', 420),
                                     ],
                                   )),
                                 ),
@@ -109,19 +115,20 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(bottom: 14.5),
+                          margin: EdgeInsets.only(bottom: 15),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               FaIcon(FontAwesomeIcons.solidClock, color: orangeColor1, size: 19.5),
                               Expanded(
                                 child: Container(
                                   margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
-                                  child: Text("10:00~21:00(과학체험부스10:00~19:00 / 별음악회, 시낭송: 19:00~21:00)",style: TextStyle (
+                                  child: Text(snapshot.data?["playtime"].replaceAll("<br>", "\n") ,style: TextStyle (
                                     height: 1.3,
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 440),
+                                      const FontVariation('wght', 420),
                                     ],
                                   )),
                                 ),
@@ -130,18 +137,19 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(bottom: 14.5),
+                          margin: EdgeInsets.only(bottom: 15),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               FaIcon(FontAwesomeIcons.wonSign, color: orangeColor1, size: 19),
                               Expanded(
                                 child: Container(
                                   margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
-                                  child: Text("부분 유료",style: TextStyle (
+                                  child: Text(mainData["price"],style: TextStyle (
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 440),
+                                      const FontVariation('wght', 420),
                                     ],
                                   )),
                                 ),
@@ -151,25 +159,41 @@ class _DetailPageState extends State<DetailPage> {
                         ),
                         Container(
                           // color: Colors.amber,
-                          margin: EdgeInsets.only(bottom: 10),
+                          margin: EdgeInsets.only(bottom: 17),
                           child: Row(
                             children: [
                               FaIcon(FontAwesomeIcons.locationDot, color: orangeColor1, size: 25,),
                               Expanded(
                                 child: Container(
                                   margin: EdgeInsets.fromLTRB(12, 0, 0, 0),
-                                  child: Text("경상남도 고성군 당항만로 1116 당항포관광지",style: TextStyle (
+                                  child: Text(mainData["locate_full"],style: TextStyle (
                                     fontSize: 14.7,
                                     color: Colors.black,
                                     fontVariations: <FontVariation>[
-                                      const FontVariation('wght', 440),
+                                      const FontVariation('wght', 420),
                                     ],
                                   )),
                                 ),
                               )
                             ],
                           ),
+                        ), 
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Color(0xffD8D8D8), width: 1),
+                            borderRadius: BorderRadius.all(Radius.circular(8))
+                          ),
+                          margin: EdgeInsets.only(left: 33),
+                          width: 270,
+                          height: 140,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: getMap(double.parse(mainData["mapx"]),double.parse(mainData["mapy"]))
+                          )
                         ),
+                        SizedBox(
+                          height: 250,
+                        )
                       ],
                     )
                   )
@@ -181,6 +205,29 @@ class _DetailPageState extends State<DetailPage> {
           }),
       )
     );
+  }
+
+  Widget getMap(x,y) {
+    if (Platform.isAndroid) {
+      return KakaoMap(
+        option: KakaoMapOption(
+          position: LatLng(y, x),
+          zoomLevel: 16,
+          mapType: MapType.normal,
+        ),
+      onMapReady: (KakaoMapController controller) {
+        printLog("카카오 지도가 정상적으로 불러와졌습니다.");
+        controller.labelLayer.addPoi(LatLng(y, x), style: PoiStyle(
+          icon: KImage.fromAsset("assets/pin.png", 22, 22)
+        ));
+      });
+    } else {
+      return Container(
+        width: double.maxFinite,
+        height: double.maxFinite,
+        color: const Color.fromARGB(255, 241, 241, 241)
+      );
+    }
   }
 }
 

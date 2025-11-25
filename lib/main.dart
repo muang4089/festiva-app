@@ -1,19 +1,23 @@
+import 'dart:io';
+
 import 'package:festiva/firebase_options.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:festiva/home_page.dart';
 import 'package:festiva/list_page.dart';
+import 'package:kakao_map_sdk/kakao_map_sdk.dart'; 
 
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // await windowManager.ensureInitialized();
-  // windowManager.setSize(const Size(512, 1109));
-
+  await dotenv.load(fileName: "assets/config/.env");
+  if (Platform.isAndroid) {
+    await KakaoMapSdk.instance.initialize(dotenv.env["KAKAO_API_KEY"]!);
+  }
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

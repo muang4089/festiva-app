@@ -147,12 +147,15 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
               "title": doc["title"],
               "img": doc["firstimage"],
               "locate": "${doc["addr1"].toString().split(" ")[0]} ${doc["addr1"].toString().split(" ")[1]}",
+              "locate_full": doc["addr1"],
               "start_date": startDate,
               "end_date": endDate,
-              "price": doc["price"],
+              "price": doc["price"].replaceAll("<br>", "\n"),
               "state": stateMsg,
               "color": textColor,
-              "id": doc["contentid"]
+              "id": doc["contentid"],
+              "mapx": doc["mapx"],
+              "mapy": doc["mapy"]
             });
             lastdocId = doc["contentid"];
             // printLog(festival);

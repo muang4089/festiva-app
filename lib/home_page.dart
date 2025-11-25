@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                 "locate": "${doc["addr1"].toString().split(" ")[0]} ${doc["addr1"].toString().split(" ")[1]}",
                 "start_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventstartdate"])),
                 "end_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventenddate"])),
-                "price": doc["price"],
+                "price": doc["price"].replaceAll("<br>", "\n"),
               });
             });
       }

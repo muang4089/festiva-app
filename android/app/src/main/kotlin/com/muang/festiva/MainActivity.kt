@@ -1,4 +1,4 @@
-package com.example.festiva
+package com.muang.festiva
 
 import io.flutter.embedding.android.FlutterActivity
 
