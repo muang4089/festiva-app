@@ -77,8 +77,8 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
               printLog("test");
               await _firebase.collection(targetDatabases["main_db"]).doc(ids[searchIndex]).get().then((snapshot) {
                 try {
-                  String startDate = DateFormat("yyyy.MM.dd").format(DateTime.parse(snapshot.data()?["eventstartdate"]));
-                  String endDate = DateFormat("yyyy.MM.dd").format(DateTime.parse(snapshot.data()?["eventenddate"]));
+                  String startDate = DateFormat("yyyy.MM.dd").format(DateTime.parse(snapshot.data()?["eventstartdate"] ?? (throw FormatException('eventstartdate error ${ids[searchIndex]}'))));
+                  String endDate = DateFormat("yyyy.MM.dd").format(DateTime.parse(snapshot.data()?["eventenddate"] ?? (throw FormatException('eventenddate error ${ids[searchIndex]}'))));
                   int state = today.compareTo(startDate)+today.compareTo(endDate);
                   String stateMsg = "";
                   Color textColor = Colors.white;
@@ -93,15 +93,18 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
                     textColor = Color.fromARGB(255, 129, 129, 129);
                   }
                   festival.add({
-                    "title": snapshot.data()?["title"],
-                    "img": snapshot.data()?["firstimage"],
+                    "title": snapshot.data()?["title"] ?? (throw FormatException('title error ${ids[searchIndex]}')),
+                    "img": snapshot.data()?["firstimage"] ?? (throw FormatException('firstimage error ${ids[searchIndex]}')),
                     "locate": "${snapshot.data()?["addr1"].toString().split(" ")[0]} ${snapshot.data()?["addr1"].toString().split(" ")[1]}",
+                    "locate_full": snapshot.data()?["addr1"] ?? (throw FormatException('locate_full error ${ids[searchIndex]}')),
                     "start_date": startDate,
                     "end_date": endDate,
-                    "price": snapshot.data()?["price"].replaceAll("<br>", "\n"),
+                    "price": snapshot.data()?["price"].replaceAll("<br>", "\n") ?? (throw FormatException('price error ${ids[searchIndex]}')),
                     "state": stateMsg,
                     "color": textColor,
-                    "id": snapshot.data()?["contentid"]
+                    "id": snapshot.data()?["contentid"] ?? (throw FormatException('contentid error ${ids[searchIndex]}')),
+                    "mapx": snapshot.data()?["mapx"] ?? (throw FormatException('mapx error ${ids[searchIndex]}')),
+                    "mapy": snapshot.data()?["mapy"] ?? (throw FormatException('mapy error ${ids[searchIndex]}'))
                   });
                   // printLog(festival);
                 } catch (e) {
@@ -117,6 +120,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
       paginationLock = false;
       setState(() {
         globalFestivals.addAll(festival);
+        printLog(festival);
       });
     }
   }
@@ -169,7 +173,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
       if (index == 0) {
         globalFestivals = [];
         lastdocId = "";
-        printLog("getfirst");
+        printLog("get first");
         await _firebase.collection(targetDatabases["main_db"]).limit(5).get().then((snapshot) {
           packagingData(snapshot);
         });
@@ -340,24 +344,24 @@ class ListCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Container(
-                    constraints: BoxConstraints(minHeight: 98,maxWidth: double.maxFinite),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          festivaData["title"],
-                          style: TextStyle(
-                            fontSize: 19.5,
-                            overflow: TextOverflow.clip,
-                            // color: const Color.fromARGB(255, 0, 0, 0),
-                            fontVariations: <FontVariation>[
-                              const FontVariation('wght', 720),
-                            ],
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        festivaData["title"],
+                        style: TextStyle(
+                          fontSize: 19.5,
+                          overflow: TextOverflow.clip,
+                          // color: const Color.fromARGB(255, 0, 0, 0),
+                          fontVariations: <FontVariation>[
+                            const FontVariation('wght', 720),
+                          ],
                         ),
-                        Text(
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 4.2),
+                        child: Text(
                           festivaData["locate"],
                           style: TextStyle(
                             overflow: TextOverflow.ellipsis,
@@ -368,7 +372,10 @@ class ListCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Text(
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 4.2),
+                        child: Text(
                           "${festivaData["start_date"]} ~ ${festivaData["end_date"]}",
                           style: TextStyle(
                             overflow: TextOverflow.ellipsis,
@@ -379,7 +386,10 @@ class ListCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Text(
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 4.2),
+                        child: Text(
                           festivaData["price"],
                           style: TextStyle(
                             fontSize: 13.5,
@@ -390,8 +400,8 @@ class ListCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 Container(

@@ -81,19 +81,23 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
             .doc(_id.toString())
             .get()
             .then((doc) {
-              list.add({
-                "title": doc["title"],
-                "img": doc["firstimage"],
-                "locate": "${doc["addr1"].toString().split(" ")[0]} ${doc["addr1"].toString().split(" ")[1]}",
-                "start_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventstartdate"])),
-                "end_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventenddate"])),
-                "price": doc["price"].replaceAll("<br>", "\n"),
-              });
+              try {
+                list.add({
+                  "title": doc["title"],
+                  "img": doc["firstimage"],
+                  "locate": "${doc["addr1"].toString().split(" ")[0]} ${doc["addr1"].toString().split(" ")[1]}",
+                  "start_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventstartdate"])),
+                  "end_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventenddate"])),
+                  "price": doc["price"].replaceAll("<br>", "\n"),
+                });
+              } catch(e) {
+                printLog(e);
+              }
+              // printLog(doc["title"]);
             });
       }
       data.add(list);
     }
-    // printLog(data);
     return {"data": data, "list_titles": recmdListData["list_titles"]};
   }
 
@@ -131,6 +135,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                         child: ListView.builder(
                           primary: false,
                           shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
                           itemCount: snapshot.data?.length,
                           itemBuilder: (BuildContext context, int index) {
                             return RecmdList(
@@ -459,9 +464,9 @@ class RecmdList extends StatelessWidget {
           ),
           Column(
             children: [
-              RecmdListCard(cardData: recmdData[0]),
-              RecmdListCard(cardData: recmdData[1]),
-              RecmdListCard(cardData: recmdData[2]),
+              if ( recmdData.length >= 1) RecmdListCard(cardData: recmdData[0]),
+              if ( recmdData.length >= 2) RecmdListCard(cardData: recmdData[1]),
+              if ( recmdData.length >= 3) RecmdListCard(cardData: recmdData[2]),
             ],
           ),
         ],
