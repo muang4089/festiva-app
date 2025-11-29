@@ -94,17 +94,17 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
                   }
                   festival.add({
                     "title": snapshot.data()?["title"] ?? (throw FormatException('title error ${ids[searchIndex]}')),
-                    "img": snapshot.data()?["firstimage"] ?? (throw FormatException('firstimage error ${ids[searchIndex]}')),
-                    "locate": "${snapshot.data()?["addr1"].toString().split(" ")[0]} ${snapshot.data()?["addr1"].toString().split(" ")[1]}",
-                    "locate_full": snapshot.data()?["addr1"] ?? (throw FormatException('locate_full error ${ids[searchIndex]}')),
+                    "img": snapshot.data()?["firstimage"] ?? "",
+                    "locate": "${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[0]} ${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[1]}",
+                    "locate_full": snapshot.data()?["addr1"] ?? "",
                     "start_date": startDate,
                     "end_date": endDate,
                     "price": snapshot.data()?["price"].replaceAll("<br>", "\n") ?? (throw FormatException('price error ${ids[searchIndex]}')),
                     "state": stateMsg,
                     "color": textColor,
                     "id": snapshot.data()?["contentid"] ?? (throw FormatException('contentid error ${ids[searchIndex]}')),
-                    "mapx": snapshot.data()?["mapx"] ?? (throw FormatException('mapx error ${ids[searchIndex]}')),
-                    "mapy": snapshot.data()?["mapy"] ?? (throw FormatException('mapy error ${ids[searchIndex]}'))
+                    "mapx": snapshot.data()?["mapx"] ?? "",
+                    "mapy": snapshot.data()?["mapy"] ?? ""
                   });
                   // printLog(festival);
                 } catch (e) {
@@ -149,17 +149,17 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
             }
             festival.add({
               "title": doc["title"],
-              "img": doc["firstimage"],
-              "locate": "${doc["addr1"].toString().split(" ")[0]} ${doc["addr1"].toString().split(" ")[1]}",
-              "locate_full": doc["addr1"],
+              "img": doc.data()["firstimage"] ?? "",
+              "locate": "${(doc.data()["addr1"] ?? "").isEmpty ? "" : doc.data()["addr1"].toString().split(" ")[0]} ${(doc.data()["addr1"] ?? "").isEmpty ? "" : doc.data()["addr1"].toString().split(" ")[1]}",
+              "locate_full": doc.data()["addr1"] ?? "",
               "start_date": startDate,
               "end_date": endDate,
               "price": doc["price"].replaceAll("<br>", "\n"),
               "state": stateMsg,
               "color": textColor,
               "id": doc["contentid"],
-              "mapx": doc["mapx"],
-              "mapy": doc["mapy"]
+              "mapx": doc.data()["mapx"] ?? "",
+              "mapy": doc.data()["mapy"] ?? "",
             });
             lastdocId = doc["contentid"];
             // printLog(festival);
@@ -174,17 +174,17 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
         globalFestivals = [];
         lastdocId = "";
         printLog("get first");
-        await _firebase.collection(targetDatabases["main_db"]).limit(5).get().then((snapshot) {
+        await _firebase.collection(targetDatabases["main_db"]).orderBy("modifiedtime", descending: true).limit(5).get().then((snapshot) {
           packagingData(snapshot);
         });
         await _firebase.collection(targetDatabases["main_db"]).count().get().then((snapshot) => {
           docCount = snapshot.count!
         });
-        printLog(docCount);
+        // printLog(docCount);
       } else {
         printLog("get more");
         var lastdoc = await _firebase.collection(targetDatabases["main_db"]).doc(lastdocId).get();
-        await _firebase.collection(targetDatabases["main_db"]).startAfterDocument(lastdoc).limit(5).get().then((snapshot) {
+        await _firebase.collection(targetDatabases["main_db"]).orderBy("modifiedtime", descending: true).startAfterDocument(lastdoc).limit(5).get().then((snapshot) {
           packagingData(snapshot);
         });
       }
@@ -219,7 +219,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
       controller: listScrollCtrl,
       slivers: [
         SliverAppBar(
-          toolbarHeight: 65,
+          toolbarHeight: 76,
           scrolledUnderElevation: 10,
           elevation: 0,
           backgroundColor: const Color.fromARGB(255, 255, 255, 255),
@@ -229,43 +229,46 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
           floating: true,
           // snap: true,
           // pinned: true,
-          title: SearchBar(
-            hintText: "검색",
-            leading: FaIcon(
-              FontAwesomeIcons.magnifyingGlass,
-              color: const Color(0xffE47C49),
-              size: 29,
-            ),
-            onSubmitted: (value) {
-              if (value.trim().isNotEmpty) {
-                searchTitle(value);
-              } else if (value.trim().isEmpty && isSearch) {
-                getMainDataList(0, 5);
-                isSearch = false;
-              }
-            },
-            trailing: [
-             
-              //         TextButton(
-              //   onPressed: (){
-              //     getSearchResult();
-              //   },
-              //   child: Text('Disabled TextButton'),
-              // ),
-            ],
-            backgroundColor: WidgetStatePropertyAll(Colors.white),
-            overlayColor: WidgetStatePropertyAll(Colors.white),
-            elevation: WidgetStatePropertyAll(0),
-            constraints: BoxConstraints(minHeight: 46),
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
-            side: WidgetStatePropertyAll(
-              BorderSide(color: Color.fromARGB(255, 218, 218, 218), width: 1.4),
+          title: Container(
+            margin: EdgeInsets.only(top: 12),
+            child: SearchBar(
+              hintText: "검색",
+              leading: FaIcon(
+                FontAwesomeIcons.magnifyingGlass,
+                color: const Color(0xffE47C49),
+                size: 29,
+              ),
+              onSubmitted: (value) {
+                if (value.trim().isNotEmpty) {
+                  searchTitle(value);
+                } else if (value.trim().isEmpty && isSearch) {
+                  getMainDataList(0, 5);
+                  isSearch = false;
+                }
+              },
+              trailing: [
+               
+                //         TextButton(
+                //   onPressed: (){
+                //     getSearchResult();
+                //   },
+                //   child: Text('Disabled TextButton'),
+                // ),
+              ],
+              backgroundColor: WidgetStatePropertyAll(Colors.white),
+              overlayColor: WidgetStatePropertyAll(Colors.white),
+              elevation: WidgetStatePropertyAll(0),
+              constraints: BoxConstraints(minHeight: 46),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              side: WidgetStatePropertyAll(
+                BorderSide(color: Color.fromARGB(255, 218, 218, 218), width: 1.4),
+              ),
             ),
           ),
         ),
-        SliverToBoxAdapter(child: SizedBox(height: 70)),
+        SliverToBoxAdapter(child: SizedBox(height: 50)),
         
         SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -359,20 +362,21 @@ class ListCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Container(
-                        margin: EdgeInsets.only(top: 4.2),
-                        child: Text(
-                          festivaData["locate"],
-                          style: TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            fontSize: 13.3,
-                            color: greyColor1,
-                            fontVariations: <FontVariation>[
-                              FontVariation("wght", 520),
-                            ],
+                      if (festivaData["locate"].trim().isNotEmpty)
+                        Container(
+                          margin: EdgeInsets.only(top: 4.2),
+                          child: Text(
+                            festivaData["locate"],
+                            style: TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              fontSize: 13.3,
+                              color: greyColor1,
+                              fontVariations: <FontVariation>[
+                                FontVariation("wght", 520),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                       Container(
                         margin: EdgeInsets.only(top: 4.2),
                         child: Text(
@@ -390,7 +394,7 @@ class ListCard extends StatelessWidget {
                       Container(
                         margin: EdgeInsets.only(top: 4.2),
                         child: Text(
-                          festivaData["price"],
+                          festivaData["price"].isEmpty? "가격정보가 없습니다" : festivaData["price"],
                           style: TextStyle(
                             fontSize: 13.5,
                             color: orangeColor2,

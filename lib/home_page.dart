@@ -389,7 +389,7 @@ class RecmdListCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    cardData["price"],
+                    cardData["price"].isEmpty ? "가격정보가 없습니다" : cardData["price"],
                     style: TextStyle(
                       fontSize: 12.5,
                       color: orangeColor2,
@@ -440,25 +440,25 @@ class RecmdList extends StatelessWidget {
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      "더보기 ",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: const Color(0xff707070),
-                        fontVariations: <FontVariation>[
-                          FontVariation("wght", 500),
-                        ],
-                      ),
-                    ),
-                    FaIcon(
-                      FontAwesomeIcons.chevronRight,
-                      color: const Color(0xff707070),
-                      size: 13,
-                    ),
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     Text(
+                //       "더보기 ",
+                //       style: TextStyle(
+                //         fontSize: 14,
+                //         color: const Color(0xff707070),
+                //         fontVariations: <FontVariation>[
+                //           FontVariation("wght", 500),
+                //         ],
+                //       ),
+                //     ),
+                //     FaIcon(
+                //       FontAwesomeIcons.chevronRight,
+                //       color: const Color(0xff707070),
+                //       size: 13,
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           ),
