@@ -1,4 +1,8 @@
+import 'dart:math';
+
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -11,12 +15,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 Map targetDatabases = {
   "main_db": "",
   "detail_db": "",
-  "titles_db": ""
+  "titles_db": "",
+  "recommend_db": "",
+  "carousel_db": ""
 };
 
 void printLog(e) {
   debugPrint(e.toString());
 }
+final FirebaseFirestore _firebase = FirebaseFirestore.instance;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,7 +33,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
-  final FirebaseFirestore _firebase = FirebaseFirestore.instance;
+  // final FirebaseFirestore _firebase = FirebaseFirestore.instance;
 
   @override
   bool get wantKeepAlive => true;
@@ -36,6 +43,8 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
       targetDatabases["main_db"] = "festivals_main_data_${snapshot.data()?['main']}";
       targetDatabases["detail_db"] = "festivals_detail_data_${snapshot.data()?['detail']}";
       targetDatabases["titles_db"] = "titles_${snapshot.data()?['titles']}";
+      targetDatabases["carousel_db"] = "Carousel_list_${snapshot.data()?['carousel']}";
+      targetDatabases["recommend_db"] = "Recommended_festivals_${snapshot.data()?['recommend']}";
       printLog(targetDatabases);
     });
     return getRecmdData();
@@ -46,8 +55,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
     List<List> preIds = [];
     List<String> listTitles = [];
     try {
-      final recmdSnapshot =
-          await _firebase.collection('Recommended_festivals').get();
+      final recmdSnapshot = await _firebase.collection(targetDatabases["recommend_db"]).get();
       for (var doc in recmdSnapshot.docs) {
         try {
           preIds.add(doc["pre_ids"]);
@@ -70,7 +78,45 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
 
   Future<Map> getRecmdData() async {
     var recmdListData = await getRecmdList();
-    // var recmdPreIds = recmdListData["pre_ids"];
+    var carouselData = await _firebase.collection(targetDatabases["carousel_db"]).get();
+    List carouselList = [];
+    for (var doc in carouselData.docs) {
+      try {
+        await _firebase.collection(targetDatabases["main_db"]).doc(doc.id).get().then((snapshot) {
+          String startDate = DateFormat("yyyy.MM.dd").format(DateTime.parse(snapshot.data()?["eventstartdate"] ?? (throw FormatException('eventstartdate error ${doc.id}'))));
+          String endDate = DateFormat("yyyy.MM.dd").format(DateTime.parse(snapshot.data()?["eventenddate"] ?? (throw FormatException('eventenddate error ${doc.id}'))));
+          String stateMsg = "";
+
+          switch (snapshot.data()?["state"] ?? (throw FormatException('state error ${doc.id}'))) {
+            case "1":
+              stateMsg = "개최 중";
+            case "0":
+              stateMsg = "개최 예정";
+            case "-1":
+              stateMsg = "종료";
+          }
+          carouselList.add(
+            {
+              "title": snapshot.data()?["title"] ?? (throw FormatException('title error ${doc.id}')),
+              "date": "$startDate - $endDate",
+              "state": stateMsg,
+              "img": snapshot.data()?["firstimage"] ?? (throw FormatException('image error ${doc.id}')),
+              "locate": "${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[0]} ${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[1]}",
+              "locate_full": snapshot.data()?["addr1"] ?? "",
+              "start_date": startDate,
+              "end_date": endDate,
+              "price": snapshot.data()?["price"].replaceAll("<br>", "\n"),
+              "id": snapshot.data()?["contentid"],
+              "mapx": snapshot.data()?["mapx"] ?? "",
+              "mapy": snapshot.data()?["mapy"] ?? "",
+            }
+          );
+        });
+        
+      } catch (e) {
+        printLog(e);
+      }
+    }
     List data = [];
     List list = [];
     for (int i = 0; i < recmdListData["length"]; i++) {
@@ -98,7 +144,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
       }
       data.add(list);
     }
-    return {"data": data, "list_titles": recmdListData["list_titles"]};
+    return {"data": data, "list_titles": recmdListData["list_titles"], "carousel_list" : carouselList};
   }
 
   @override
@@ -128,7 +174,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                     children: [
                       Container(
                         margin: EdgeInsets.only(top: 7),
-                        child: Carousel(),
+                        child: Carousel(data: snapshot.data?["carousel_list"]),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.882,
@@ -136,7 +182,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                           primary: false,
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: snapshot.data?.length,
+                          itemCount: snapshot.data?["list_titles"].length,
                           itemBuilder: (BuildContext context, int index) {
                             return RecmdList(
                               recmdData: snapshot.data?["data"][index],
@@ -158,7 +204,9 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
 }
 
 class Carousel extends StatefulWidget {
-  const Carousel({super.key});
+
+  final List data;
+  const Carousel({super.key, required this.data});
 
   @override
   State<Carousel> createState() => _CarouselState();
@@ -167,12 +215,19 @@ class Carousel extends StatefulWidget {
 class _CarouselState extends State<Carousel> {
   int _current = 0;
   final CarouselSliderController _controller = CarouselSliderController();
-  List imgList = [
-    'assets/test1.png',
-    'assets/test1.png',
-    'assets/test1.png',
-    'assets/test1.png',
-  ];
+  late List data;
+  List imgList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    data = widget.data;
+    int i = 0;
+    for (var context in data) {
+      imgList.add([context["img"], i]);
+      i++;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,95 +239,100 @@ class _CarouselState extends State<Carousel> {
               imgList.map((img) {
                 return Builder(
                   builder: (context) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Skeletonizer(
-                        effect: SoldColorEffect(),
-                        enabled: false,
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.76,
-                          child: Skeleton.leaf(
-                            child: Stack(
-                              // fit: StackFit.expand,
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                Image.asset(
-                                  img,
-                                  fit: BoxFit.cover,
-                                  width: double.maxFinite,
-                                  height: double.maxFinite,
-                                  color: const Color.fromRGBO(0, 0, 0, 0.03),
-                                  colorBlendMode: BlendMode.multiply,
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        const Color.fromRGBO(0, 0, 0, 0.04),
-                                        const Color.fromRGBO(0, 0, 0, 0.294),
-                                      ],
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => DetailPage(mainData: data[img[1]], firebase: _firebase,)
+                          )
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Skeletonizer(
+                          effect: SoldColorEffect(),
+                          enabled: false,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.76,
+                            child: Skeleton.leaf(
+                              child: Stack(
+                                // fit: StackFit.expand,
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  Image.network(
+                                    img[0],
+                                    fit: BoxFit.cover,
+                                    width: double.maxFinite,
+                                    height: double.maxFinite,
+                                    color: const Color.fromRGBO(0, 0, 0, 0.03),
+                                    colorBlendMode: BlendMode.multiply,
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          const Color.fromARGB(0, 255, 255, 255),
+                                          const Color.fromARGB(159, 0, 0, 0),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                                  width: double.maxFinite,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "04.01 - 12.24",
-                                        style: TextStyle(
-                                          fontSize: 19,
-                                          color: const Color(0xffF9F9F9),
-                                          fontVariations: <FontVariation>[
-                                            FontVariation('wght', 380),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        "가파도청보리축제$_current",
-                                        style: TextStyle(
-                                          fontSize: 28,
-                                          color: const Color(0xffFDFDFD),
-                                          fontVariations: <FontVariation>[
-                                            const FontVariation('wght', 440),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(top: 10),
-                                        padding: EdgeInsets.fromLTRB(
-                                          9,
-                                          0.6,
-                                          9,
-                                          0.6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            50,
-                                          ),
-                                          color: Colors.white,
-                                        ),
-                                        child: Text(
-                                          "개최중",
+                                  Container(
+                                    padding: EdgeInsets.fromLTRB(16, 0, 10, 22),
+                                    width: double.maxFinite,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Text(
+                                        //   data[img[1]]["date"],
+                                        //   style: TextStyle(
+                                        //     fontSize: 19,
+                                        //     color: const Color(0xffF9F9F9),
+                                        //     fontVariations: <FontVariation>[
+                                        //       FontVariation('wght', 700),
+                                        //     ],
+                                        //   ),
+                                        // ),
+                                        AutoSizeText(
+                                          data[img[1]]["title"],
+                                          maxLines: 1,
+                                          maxFontSize: 28,
                                           style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black,
+                                            fontSize: 28,
+                                            color: const Color(0xffFDFDFD),
                                             fontVariations: <FontVariation>[
-                                              const FontVariation('wght', 600),
+                                              const FontVariation('wght', 650),
                                             ],
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        Container(
+                                          margin: EdgeInsets.only(top: 12),
+                                          padding: EdgeInsets.fromLTRB(9, 0.6, 9, 0.6),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              50,
+                                            ),
+                                            color: Colors.white,
+                                          ),
+                                          child: Text(
+                                            data[img[1]]["state"],
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black,
+                                              fontVariations: <FontVariation>[
+                                                const FontVariation('wght', 600),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

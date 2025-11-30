@@ -49,6 +49,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   expandable_text: ^2.3.0
   url_launcher: ^6.3.2
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:

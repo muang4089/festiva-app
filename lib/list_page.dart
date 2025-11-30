@@ -174,7 +174,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
         globalFestivals = [];
         lastdocId = "";
         printLog("get first");
-        await _firebase.collection(targetDatabases["main_db"]).orderBy("modifiedtime", descending: true).limit(5).get().then((snapshot) {
+        await _firebase.collection(targetDatabases["main_db"]).orderBy("state", descending: true).orderBy("modifiedtime", descending: true).limit(5).get().then((snapshot) {
           packagingData(snapshot);
         });
         await _firebase.collection(targetDatabases["main_db"]).count().get().then((snapshot) => {
@@ -184,7 +184,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
       } else {
         printLog("get more");
         var lastdoc = await _firebase.collection(targetDatabases["main_db"]).doc(lastdocId).get();
-        await _firebase.collection(targetDatabases["main_db"]).orderBy("modifiedtime", descending: true).startAfterDocument(lastdoc).limit(5).get().then((snapshot) {
+        await _firebase.collection(targetDatabases["main_db"]).orderBy("state", descending: true).orderBy("modifiedtime", descending: true).startAfterDocument(lastdoc).limit(5).get().then((snapshot) {
           packagingData(snapshot);
         });
       }
@@ -268,7 +268,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
             ),
           ),
         ),
-        SliverToBoxAdapter(child: SizedBox(height: 50)),
+        SliverToBoxAdapter(child: SizedBox(height: 37)),
         
         SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -281,22 +281,6 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
                 }
               }, childCount: globalFestivals.length),
             )
-        // FutureBuilder(
-        //   future: getMainDataList(0,5),
-        //   builder: (context, snapshot) {
-        //     return SliverList(
-        //       delegate: SliverChildBuilderDelegate((context, index) {
-        //         if (snapshot.connectionState != ConnectionState.done) {
-        //           return Text("loading");
-        //         } else {
-        //           return ListCard(
-        //             festivaData: snapshot.data?["festivals"][index]
-        //           );
-        //         }
-        //       }, childCount: 5),
-        //     );
-        //   },
-        // ),
       ],
     );
   }
@@ -351,15 +335,18 @@ class ListCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        festivaData["title"],
-                        style: TextStyle(
-                          fontSize: 19.5,
-                          overflow: TextOverflow.clip,
-                          // color: const Color.fromARGB(255, 0, 0, 0),
-                          fontVariations: <FontVariation>[
-                            const FontVariation('wght', 720),
-                          ],
+                      Container(
+                        padding: EdgeInsets.only(right: 15),
+                        child: Text(
+                          festivaData["title"],
+                          style: TextStyle(
+                            fontSize: 19.5,
+                            overflow: TextOverflow.clip,
+                            // color: const Color.fromARGB(255, 0, 0, 0),
+                            fontVariations: <FontVariation>[
+                              const FontVariation('wght', 720),
+                            ],
+                          ),
                         ),
                       ),
                       if (festivaData["locate"].trim().isNotEmpty)
@@ -409,7 +396,7 @@ class ListCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(top: 2.5),
+                  margin: EdgeInsets.only(top: 2.6),
                   padding: EdgeInsets.fromLTRB(8, 1, 8, 1),
                   decoration: BoxDecoration(
                     border: Border.all(width: 1, color: festivaData["color"]),
@@ -434,59 +421,3 @@ class ListCard extends StatelessWidget {
     );
   }
 }
-// Padding(
-//             padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-//             child: Container(
-//               margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
-//               decoration: BoxDecoration(
-//                 boxShadow: [BoxShadow(
-//                   color: Color.fromARGB(255, 218, 218, 218),
-//                   blurRadius: 4,
-//                   // spreadRadius: 0.3
-//                 )],
-//                 borderRadius: BorderRadius.circular(10)
-//               ),
-//               // height: 40,
-//               child: TextField(
-//                 style: TextStyle(
-//                     fontSize: 16,
-//                     fontVariations: <FontVariation>[
-//                       const FontVariation('wght', 400),
-//                     ],
-//                   ),
-//                 decoration: InputDecoration(
-//                   isDense: true,
-//                   fillColor: const Color(0xffFEFEFE),
-//                   filled: true,
-            
-//                   hintText: "검색",
-//                   hintStyle: TextStyle(
-//                     fontSize: 16,
-//                     color: const Color.fromARGB(255, 123, 123, 123),
-//                     fontVariations: <FontVariation>[
-//                       const FontVariation('wght', 500),
-//                     ],
-//                   ),
-//                   prefixIcon: Icon(FontAwesomeIcons.magnifyingGlass,color: const Color(0xffE47C49),size: 27,),
-//                   suffixIcon: Icon(Icons.filter_list_rounded,color: const Color(0xff6D6D6D), size: 27,),
-//                   enabledBorder: OutlineInputBorder(
-//                     // borderSide: BorderSide.none,
-//                     borderSide: BorderSide(
-//                       color: Color(0xffE2E2E2),
-//                       width: 1
-//                     ),
-//                     borderRadius: BorderRadius.circular(10),
-//                   ),
-//                   focusedBorder: OutlineInputBorder(
-//                     // borderSide: BorderSide.none,
-//                     borderSide: BorderSide(
-//                       color: Color(0xffE2E2E2),
-//                       width: 1
-//                     ),
-//                     borderRadius: BorderRadius.circular(10),
-//                   ),
-//                 ),            
-//                 // textAlign: TextAlign.center,
-//               ),
-//             ),
-//           ),

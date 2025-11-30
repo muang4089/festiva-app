@@ -59,8 +59,7 @@ class _PagesState extends State<Pages> {
   final List<Widget> _pages = const [
     HomePage(),
     ListPage(),
-    ListPage(),
-    ListPage()
+    // ListPage(),
   ];
 
   @override
@@ -87,8 +86,8 @@ class _PagesState extends State<Pages> {
           items: const [
             BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.house, size: 15,), label: "홈"),
             BottomNavigationBarItem(icon: Icon(Icons.celebration_rounded, size: 23,), label: "축제•행사"),
-            BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.mapLocationDot, size: 15,), label: "지도탐색"),
-            BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.solidHeart, size: 15,), label: "즐겨찾기"),
+            // BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.mapLocationDot, size: 15,), label: "지도탐색"),
+            BottomNavigationBarItem(icon: IgnorePointer(ignoring: true, child: FaIcon(FontAwesomeIcons.solidHeart, size: 15,)), label: "즐겨찾기"),
           ]
         ),
       ),
