@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -135,6 +132,10 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                   "start_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventstartdate"])),
                   "end_date": DateFormat("yyyy.MM.dd").format(DateTime.parse(doc["eventenddate"])),
                   "price": doc["price"].replaceAll("<br>", "\n"),
+                  "locate_full": doc["addr1"] ?? "",
+                  "id": doc["contentid"],
+                  "mapx": doc["mapx"] ?? "",
+                  "mapy": doc["mapy"] ?? "",
                 });
               } catch(e) {
                 printLog(e);
@@ -168,7 +169,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
             return SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
                 if (snapshot.connectionState != ConnectionState.done) {
-                  return Text("loading");
+                  return Text("");
                 } else {
                   return Column(
                     children: [
@@ -272,8 +273,8 @@ class _CarouselState extends State<Carousel> {
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
                                         colors: [
-                                          const Color.fromARGB(0, 255, 255, 255),
-                                          const Color.fromARGB(159, 0, 0, 0),
+                                          const Color.fromARGB(33, 0, 0, 0),
+                                          const Color.fromARGB(125, 0, 0, 0),
                                         ],
                                       ),
                                     ),
@@ -286,16 +287,19 @@ class _CarouselState extends State<Carousel> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        // Text(
-                                        //   data[img[1]]["date"],
-                                        //   style: TextStyle(
-                                        //     fontSize: 19,
-                                        //     color: const Color(0xffF9F9F9),
-                                        //     fontVariations: <FontVariation>[
-                                        //       FontVariation('wght', 700),
-                                        //     ],
-                                        //   ),
-                                        // ),
+                                        Container(
+                                          margin: EdgeInsets.only(bottom: 3),
+                                          child: Text(
+                                            data[img[1]]["date"],
+                                            style: TextStyle(
+                                              fontSize: 19,
+                                              color: const Color(0xffF9F9F9),
+                                              fontVariations: <FontVariation>[
+                                                FontVariation('wght', 550),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                         AutoSizeText(
                                           data[img[1]]["title"],
                                           maxLines: 1,
@@ -354,7 +358,7 @@ class _CarouselState extends State<Carousel> {
           ),
         ),
         Container(
-          margin: EdgeInsets.fromLTRB(0, 14, 0, 20),
+          margin: EdgeInsets.fromLTRB(0, 14, 0, 18.5),
           child: AnimatedSmoothIndicator(
             activeIndex: _current,
             count: imgList.length,
@@ -379,91 +383,100 @@ class RecmdListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // color: Colors.blue,
-      width: MediaQuery.of(context).size.width * 0.765,
-      margin: EdgeInsets.only(bottom: 20),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              cardData["img"],
-              width: 89,
-              height: 89,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/img_error_mini.jpg',
-                  fit: BoxFit.fitHeight,
-                  width: 89,
-                  height: 89,
-                );
-              },
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) => DetailPage(mainData: cardData, firebase: _firebase,)
+          )
+        );
+      },
+      child: Container(
+        // color: Colors.blue,
+        width: MediaQuery.of(context).size.width * 0.765,
+        margin: EdgeInsets.only(bottom: 20),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                cardData["img"],
+                width: 89,
+                height: 89,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/img_error_mini.jpg',
+                    fit: BoxFit.fitHeight,
+                    width: 89,
+                    height: 89,
+                  );
+                },
+              ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              // color: Colors.black,
-              padding: EdgeInsets.only(bottom: 0.5),
-              margin: EdgeInsets.only(left: 16),
-              constraints: BoxConstraints(minHeight: 88),
-              // height: 90,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 27.8,
-                    child: Text(
-                      cardData["title"],
-                      overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Container(
+                // color: Colors.black,
+                padding: EdgeInsets.only(bottom: 0.5),
+                margin: EdgeInsets.only(left: 16),
+                constraints: BoxConstraints(minHeight: 88),
+                // height: 90,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 27.8,
+                      child: Text(
+                        cardData["title"],
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16.6,
+                          fontVariations: <FontVariation>[
+                            FontVariation("wght", 700),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Text(
+                      cardData["locate"],
                       style: TextStyle(
-                        fontSize: 16.6,
+                        overflow: TextOverflow.ellipsis,
+                        fontSize: 12.5,
+                        color: const Color.fromARGB(255, 58, 58, 58),
                         fontVariations: <FontVariation>[
-                          FontVariation("wght", 700),
+                          FontVariation("wght", 450),
                         ],
                       ),
                     ),
-                  ),
-                  Text(
-                    cardData["locate"],
-                    style: TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      fontSize: 12.5,
-                      color: const Color.fromARGB(255, 58, 58, 58),
-                      fontVariations: <FontVariation>[
-                        FontVariation("wght", 450),
-                      ],
+                    Text(
+                      "${cardData["start_date"]} ~ ${cardData["end_date"]}",
+                      style: TextStyle(
+                        // overflow: TextOverflow.ellipsis,
+                        fontSize: 12.5,
+                        color: const Color.fromARGB(255, 58, 58, 58),
+                        fontVariations: <FontVariation>[
+                          FontVariation("wght", 450),
+                        ],
+                      ),
                     ),
-                  ),
-                  Text(
-                    "${cardData["start_date"]} ~ ${cardData["end_date"]}",
-                    style: TextStyle(
-                      // overflow: TextOverflow.ellipsis,
-                      fontSize: 12.5,
-                      color: const Color.fromARGB(255, 58, 58, 58),
-                      fontVariations: <FontVariation>[
-                        FontVariation("wght", 450),
-                      ],
+                    Text(
+                      cardData["price"].isEmpty ? "가격정보가 없습니다" : cardData["price"],
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: orangeColor2,
+                        // backgroundColor: Colors.amber,
+                        fontVariations: <FontVariation>[
+                          FontVariation("wght", 450),
+                        ],
+                      ),
                     ),
-                  ),
-                  Text(
-                    cardData["price"].isEmpty ? "가격정보가 없습니다" : cardData["price"],
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: orangeColor2,
-                      // backgroundColor: Colors.amber,
-                      fontVariations: <FontVariation>[
-                        FontVariation("wght", 450),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

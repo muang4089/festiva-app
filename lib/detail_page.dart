@@ -5,9 +5,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kakao_map_sdk/kakao_map_sdk.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'home_page.dart';
 
+bool isLiked = false;
 void printLog(e) {
   debugPrint(e.toString());
 }
@@ -27,12 +29,14 @@ class _DetailPageState extends State<DetailPage> {
   List imgs = [];
   String posterImg = "";
   late Widget map;
+
   @override
   void initState() {
     super.initState();
     mainData = widget.mainData;
     firebase = widget.firebase;
   }
+
   Future<Map> getDetailData() async {
     var detailData = await firebase.collection(targetDatabases["detail_db"]).doc(mainData["id"]).get();
     imgs = [];
@@ -48,6 +52,20 @@ class _DetailPageState extends State<DetailPage> {
     }
     return detailData.data();
   }
+
+  Future<void> checkLike() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? likes = prefs.getStringList("likes");
+    printLog(likes);
+    if (likes != null && likes.contains(mainData["id"])) {
+        isLiked = true;
+        printLog("Like!");
+    } else {
+        isLiked = false;
+        printLog("NOT Like");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,6 +88,58 @@ class _DetailPageState extends State<DetailPage> {
               size: 17,
             ), onPressed: () {Navigator.pop(context);},
           ),
+          actions: [
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              // padding: EdgeInsets.zero,
+              icon: Container(
+                margin: EdgeInsets.only(top: 1.4),
+                child: FaIcon(
+                  Icons.share,
+                  color: const Color.fromARGB(255, 49, 49, 49),
+                  size: 22.5,
+                ),
+              ), onPressed: () {
+                              
+              }
+            ),
+            SizedBox(width: 1),
+            FutureBuilder(
+              future: (checkLike()),
+              builder: (context, asyncSnapshot) {
+                return IconButton(
+                  visualDensity: VisualDensity.compact,
+                  // padding: EdgeInsets.only(right: 10),
+                  icon: FaIcon(
+                    isLiked ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                    color: isLiked ? const Color.fromARGB(255, 247, 65, 65): const Color.fromARGB(255, 49, 49, 49),
+                    size: 22.5,
+                  ), onPressed: () async {
+                    setState(() {
+                      isLiked = !isLiked;
+                    });
+                    final SharedPreferences prefs = await SharedPreferences.getInstance();
+                    if (isLiked == true) {
+                      if (prefs.getStringList('likes') == null) {
+                        await prefs.setStringList("likes", <String>[mainData["id"]]);
+                      } else {
+                        List<String>? likes = prefs.getStringList("likes");
+                        likes?.add(mainData["id"]);
+                        await prefs.setStringList("likes", likes!.toSet().toList());
+                      }
+                    } else {
+                      if (prefs.getStringList('likes') != null) {
+                        List<String>? likes = prefs.getStringList("likes");
+                        likes?.remove(mainData["id"]);
+                        await prefs.setStringList("likes", likes!.toSet().toList());
+                      }
+                    }
+                  }
+                );
+              }
+            ),
+            SizedBox(width: 8.5),
+          ],
         ),
       body: SingleChildScrollView(
         child: FutureBuilder(
@@ -380,7 +450,7 @@ class _DetailPageState extends State<DetailPage> {
                 ],
               );
             } else {
-              return Text("asdf");
+              return Text("");
             }
           }),
       )
@@ -554,7 +624,7 @@ class EtcInfo extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                    width: 95,
+                    width: 100,
                     child: Text("행사 홈페이지", style: TextStyle(
                       fontSize: 15.5,
                       color: Color(0xff757575),

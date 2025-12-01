@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:festiva/firebase_options.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
