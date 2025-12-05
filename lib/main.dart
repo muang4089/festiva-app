@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:festiva/home_page.dart';
 import 'package:festiva/list_page.dart';
 import 'package:kakao_map_sdk/kakao_map_sdk.dart'; 
+import 'package:festiva/global_variable.dart';
 
 
 
@@ -64,6 +65,7 @@ class _PagesState extends State<Pages> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: GlobalVariable.navState,
       theme: ThemeData(
         fontFamily: "Pretendard"
       ),

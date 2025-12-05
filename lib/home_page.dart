@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:festiva/applink_handler.dart';
 import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,8 @@ import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:app_links/app_links.dart';
+import 'package:festiva/global_variable.dart';
 
 Map targetDatabases = {
   "main_db": "",
@@ -30,10 +34,39 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
+  final appLink = AppLinks();
+  StreamSubscription<Uri>? linkSubscription;
+  // final navigatorKey = GlobalKey<NavigatorState>();
   // final FirebaseFirestore _firebase = FirebaseFirestore.instance;
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    initDeepLinks();
+  }
+
+  @override
+  void dispose() {
+    linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> initDeepLinks() async {
+    // Handle links
+    linkSubscription = AppLinks().uriLinkStream.listen((uri) {
+      debugPrint('onAppLink: $uri');
+      openAppLink(uri);
+    });
+  }
+
+  void openAppLink(Uri uri) {
+    GlobalVariable.navState.currentState?.push( MaterialPageRoute(
+      builder: (context) => ApplinkHandler(id: "1018971", firebase: _firebase,),
+    ));
+  }
 
   Future<Map> databaseSet() async {
     await _firebase.collection('APP_DATA').doc("running_databases").get().then((snapshot) {
@@ -243,7 +276,7 @@ class _CarouselState extends State<Carousel> {
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => DetailPage(mainData: data[img[1]], firebase: _firebase,)
+                          builder: (context) => DetailPage(mainData: data[img[1]], firebase: _firebase)
                           )
                         );
                       },
@@ -387,7 +420,7 @@ class RecmdListCard extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         Navigator.push(context, MaterialPageRoute(
-          builder: (context) => DetailPage(mainData: cardData, firebase: _firebase,)
+          builder: (context) => DetailPage(mainData: cardData, firebase: _firebase)
           )
         );
       },

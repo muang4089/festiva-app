@@ -295,7 +295,7 @@ class ListCard extends StatelessWidget {
       splashColor: const Color.fromARGB(255, 243, 243, 243),
       onTap: () {
         Navigator.push(context, MaterialPageRoute(
-          builder: (context) => DetailPage(mainData: festivaData, firebase: _firebase,)
+          builder: (context) => DetailPage(mainData: festivaData, firebase: _firebase)
           )
         );
       },

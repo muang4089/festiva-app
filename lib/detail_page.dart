@@ -4,6 +4,7 @@ import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:kakao_map_sdk/kakao_map_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,10 +25,11 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  late Map mainData;
+  late Map mainData = {};
   late dynamic firebase;
   List imgs = [];
   String posterImg = "";
+  String id = "";
   late Widget map;
 
   @override
@@ -37,8 +39,13 @@ class _DetailPageState extends State<DetailPage> {
     firebase = widget.firebase;
   }
 
+  void setDetailtoMain() {
+    printLog("mainData is dempty");
+  }
+
   Future<Map> getDetailData() async {
     var detailData = await firebase.collection(targetDatabases["detail_db"]).doc(mainData["id"]).get();
+    
     imgs = [];
     imgs.add(mainData["img"]);
     if (detailData.data()["imgs"].isNotEmpty) {
