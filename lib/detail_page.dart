@@ -4,8 +4,8 @@ import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:kakao_map_sdk/kakao_map_sdk.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'home_page.dart';
@@ -107,7 +107,9 @@ class _DetailPageState extends State<DetailPage> {
                   size: 22.5,
                 ),
               ), onPressed: () {
-                              
+                Uri shareUri = Uri.parse("https://milch4089.dothome.co.kr?id=${mainData["id"]}");
+                // SharePlus.instance.share(ShareParams(uri: shareUri, title: mainData["title"], subject: mainData["title"]));
+                SharePlus.instance.share(ShareParams(text: "${mainData["title"]}\n${shareUri.toString()}"));
               }
             ),
             SizedBox(width: 1),

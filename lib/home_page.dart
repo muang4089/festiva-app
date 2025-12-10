@@ -5,6 +5,7 @@ import 'package:festiva/applink_handler.dart';
 import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -63,9 +64,15 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
   }
 
   void openAppLink(Uri uri) {
-    GlobalVariable.navState.currentState?.push( MaterialPageRoute(
-      builder: (context) => ApplinkHandler(id: "1018971", firebase: _firebase,),
-    ));
+      printLog(uri.queryParameters);
+    try {
+      GlobalVariable.navState.currentState?.push( MaterialPageRoute(
+        builder: (context) => ApplinkHandler(id: uri.queryParameters["id"], firebase: _firebase,),
+      ));
+    } catch (e) {
+      printLog('App link error: $e');
+      return;
+    }
   }
 
   Future<Map> databaseSet() async {

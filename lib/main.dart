@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:festiva/firebase_options.dart';
+import 'package:festiva/like_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -47,9 +49,11 @@ class _PagesState extends State<Pages> {
   // @override
   // void initState() {
   //   super.initState();
-  //   _pageController = PageController(initialPage: _pageIndex);
+  //   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  //   systemNavigationBarColor: Colors.blue, // navigation bar color
+  //   statusBarColor: Colors.pink, // status bar color
+  // ));
   // }
- 
   @override
   void dispose() {
     _pageController.dispose();
@@ -59,40 +63,52 @@ class _PagesState extends State<Pages> {
   final List<Widget> _pages = const [
     HomePage(),
     ListPage(),
-    // ListPage(),
+    LikePage(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: GlobalVariable.navState,
-      theme: ThemeData(
-        fontFamily: "Pretendard"
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0xffFBFBFB),
+        systemNavigationBarIconBrightness: Brightness.dark
       ),
-      home: Scaffold(
-        // floatingActionButton: FloatingActionButton(child: Icon(Icons.add),onPressed: () {}),
-        backgroundColor: Colors.white,
-        body: PageView(
-          physics: const NeverScrollableScrollPhysics(),
-          controller: _pageController,
-          children: _pages,
+      child: MaterialApp(
+        navigatorKey: GlobalVariable.navState,
+        theme: ThemeData(
+          fontFamily: "Pretendard"
         ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Color(0xffFBFBFB),
-        selectedItemColor: orangeColor1,
-        unselectedItemColor: const Color(0xff868686),
-        currentIndex: _pageIndex,
-        onTap: _onItemTapped,
-          items: const [
-            BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.house, size: 15,), label: "홈"),
-            BottomNavigationBarItem(icon: Icon(Icons.celebration_rounded, size: 23,), label: "축제•행사"),
-            // BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.mapLocationDot, size: 15,), label: "지도탐색"),
-            BottomNavigationBarItem(icon: IgnorePointer(ignoring: true, child: FaIcon(FontAwesomeIcons.solidHeart, size: 15,)), label: "즐겨찾기"),
-          ]
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: PageView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: _pages,
+            ),
+          ),
+        bottomNavigationBar: Theme(
+          data: ThemeData(
+            splashColor: Colors.transparent, 
+            // highlightColor: Colors.transparent,
+          ),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Color(0xffFBFBFB),
+            selectedItemColor: orangeColor1,
+            unselectedItemColor: const Color(0xff868686),
+            currentIndex: _pageIndex,
+            onTap: _onItemTapped,
+              items: const [
+                BottomNavigationBarItem(icon: FaIcon(FontAwesomeIcons.house, size: 15,), label: "홈"),
+                BottomNavigationBarItem(icon: Icon(Icons.celebration_rounded, size: 23,), label: "축제•행사"),
+                BottomNavigationBarItem(icon: IgnorePointer(ignoring: true, child: FaIcon(FontAwesomeIcons.solidHeart, size: 15,)), label: "즐겨찾기"),
+              ]
+            ),
         ),
+        ),
+        debugShowCheckedModeBanner: false,
       ),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
