@@ -98,6 +98,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
                     "img": snapshot.data()?["firstimage"] ?? "",
                     "locate": "${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[0]} ${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[1]}",
                     "locate_full": snapshot.data()?["addr1"] ?? "",
+                    // "locate2": snapshot.data()?["addr2"] ?? "",
                     "start_date": startDate,
                     "end_date": endDate,
                     "price": snapshot.data()?["price"].replaceAll("<br>", "\n") ?? (throw FormatException('price error ${ids[searchIndex]}')),
@@ -153,6 +154,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
               "img": doc.data()["firstimage"] ?? "",
               "locate": "${(doc.data()["addr1"] ?? "").isEmpty ? "" : doc.data()["addr1"].toString().split(" ")[0]} ${(doc.data()["addr1"] ?? "").isEmpty ? "" : doc.data()["addr1"].toString().split(" ")[1]}",
               "locate_full": doc.data()["addr1"] ?? "",
+              // "locate2": doc.data()["addr2"] ?? "",
               "start_date": startDate,
               "end_date": endDate,
               "price": doc["price"].replaceAll("<br>", "\n"),
@@ -217,6 +219,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
   Widget build(BuildContext context) {
     super.build(context);
     return CustomScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
       controller: listScrollCtrl,
       slivers: [
         SliverAppBar(
@@ -227,11 +230,11 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
           foregroundColor: const Color.fromARGB(255, 255, 255, 255),
           surfaceTintColor: Colors.white,
           centerTitle: true,
-          floating: true,
+          // floating: true,
           // snap: true,
           // pinned: true,
           title: Container(
-            margin: EdgeInsets.only(top: 12),
+            margin: EdgeInsets.fromLTRB(0, 13, 0, 5),
             child: SearchBar(
               hintText: "검색",
               leading: FaIcon(
@@ -269,7 +272,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
             ),
           ),
         ),
-        SliverToBoxAdapter(child: SizedBox(height: 37)),
+        SliverToBoxAdapter(child: SizedBox(height: 25)),
         
         SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -301,7 +304,7 @@ class ListCard extends StatelessWidget {
         );
       },
       child: Container(
-        margin: EdgeInsets.fromLTRB(0, 22, 0, 22),
+        margin: EdgeInsets.fromLTRB(0, 23, 0, 23),
         padding: EdgeInsets.symmetric(
           horizontal: MediaQuery.of(context).size.width * 0.035,
         ),
@@ -313,13 +316,13 @@ class ListCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               child: Image.network(
                 festivaData["img"],
-                height: 212,
+                height: 210,
                 width: double.maxFinite,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Image.asset(
                     'assets/img_error.jpg',
-                    height: 212,
+                    height: 210,
                     width: double.maxFinite,
                     fit: BoxFit.cover,
                   );
@@ -357,7 +360,7 @@ class ListCard extends StatelessWidget {
                             festivaData["locate"],
                             style: TextStyle(
                               overflow: TextOverflow.ellipsis,
-                              fontSize: 13.3,
+                              fontSize: 13.8,
                               color: greyColor1,
                               fontVariations: <FontVariation>[
                                 FontVariation("wght", 520),
@@ -371,7 +374,7 @@ class ListCard extends StatelessWidget {
                           "${festivaData["start_date"]} ~ ${festivaData["end_date"]}",
                           style: TextStyle(
                             overflow: TextOverflow.ellipsis,
-                            fontSize: 13.3,
+                            fontSize: 13.5,
                             color: greyColor1,
                             fontVariations: <FontVariation>[
                               FontVariation("wght", 460),

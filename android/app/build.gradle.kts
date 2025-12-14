@@ -10,6 +10,16 @@ plugins {
 
 import java.util.Properties
 import java.io.FileInputStream
+import java.io.FileNotFoundException
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+val dotenv = Properties().apply {
+    val file = rootProject.file("../assets/config/.env")
+    if (file.exists()) {
+        load(FileInputStream(file))
+    }
+}
+val admobID = dotenv.getProperty("ADMOB_APP_ID")
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
@@ -27,8 +37,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11) // 또는 JvmTarget.JVM_11, JvmTarget.JVM_21 등
+        }
     }
 
     defaultConfig {
@@ -41,6 +53,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
+        manifestPlaceholders["admobAppId"] = admobID
        
     }
 

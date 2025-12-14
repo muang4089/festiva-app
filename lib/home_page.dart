@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:festiva/applink_handler.dart';
 import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -34,18 +35,19 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
+class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage>, WidgetsBindingObserver {
   final appLink = AppLinks();
   StreamSubscription<Uri>? linkSubscription;
   // final navigatorKey = GlobalKey<NavigatorState>();
   // final FirebaseFirestore _firebase = FirebaseFirestore.instance;
-
+  // double get _adWidth => MediaQuery.of(context).size.width * 1;
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     initDeepLinks();
   }
 
@@ -76,6 +78,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
   }
 
   Future<Map> databaseSet() async {
+    // _loadAd();
     await _firebase.collection('APP_DATA').doc("running_databases").get().then((snapshot) {
       targetDatabases["main_db"] = "festivals_main_data_${snapshot.data()?['main']}";
       targetDatabases["detail_db"] = "festivals_detail_data_${snapshot.data()?['detail']}";
@@ -140,6 +143,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
               "img": snapshot.data()?["firstimage"] ?? (throw FormatException('image error ${doc.id}')),
               "locate": "${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[0]} ${(snapshot.data()?["addr1"] ?? "").isEmpty ? "" : snapshot.data()?["addr1"].toString().split(" ")[1]}",
               "locate_full": snapshot.data()?["addr1"] ?? "",
+              // "locate2": snapshot.data()?["addr2"] ?? "",
               "start_date": startDate,
               "end_date": endDate,
               "price": snapshot.data()?["price"].replaceAll("<br>", "\n"),
@@ -217,6 +221,8 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                         margin: EdgeInsets.only(top: 7),
                         child: Carousel(data: snapshot.data?["carousel_list"]),
                       ),
+                      if (Platform.isAndroid || Platform.isIOS)
+                        BannerAdWidget(),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.882,
                         child: ListView.builder(
@@ -243,6 +249,95 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
     );
   }
 }
+
+class BannerAdWidget extends StatefulWidget {
+  const BannerAdWidget({super.key});
+
+  @override
+  State<BannerAdWidget> createState() => _BannerAdWidgetState();
+}
+
+class _BannerAdWidgetState extends State<BannerAdWidget> {
+  BannerAd? _bannerAd;
+  AdSize? _adSize;
+  bool _isAdLoaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final availableWidth = MediaQuery.sizeOf(context).width * 0.882;
+    _isAdLoaded = false;
+    _loadAd(availableWidth);
+  }
+
+
+  void _loadAd(double availableWidth) {
+    // 현재 위젯의 너비를 가져옵니다.
+    // final availableWidth = MediaQuery.sizeOf(context).width * 0.882;
+    var size = AdSize.getInlineAdaptiveBannerAdSize(availableWidth.truncate(), 55);
+    _bannerAd?.dispose();
+    _bannerAd = null;
+
+    if (size == null) {
+      return;
+    }
+
+    // 이미 로드된 광고가 있고 사이즈가 같다면 다시 로드하지 않습니다.
+    if (_bannerAd != null && _adSize == size) {
+      return;
+    }
+
+    BannerAd(
+      adUnitId: Platform.isAndroid
+          ? "ca-app-pub-3940256099942544/9214589741" // 테스트 ID
+          : "ca-app-pub-3940256099942544/9214589741", // 테스트 ID
+      request: const AdRequest(),
+      size: size,
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          if (mounted) {
+            _bannerAd?.dispose();
+            _bannerAd = null;
+            setState(() {
+              _adSize = size;
+              _bannerAd = (ad as BannerAd);
+              printLog("load");
+            });
+          }
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint("BannerAd failed to load: $err");
+          printLog(size.width);
+          printLog("dispose");
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
+  @override
+  void dispose() {
+    _isAdLoaded = false;
+    _bannerAd?.dispose();
+    _bannerAd = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_bannerAd != null && _adSize != null && !_isAdLoaded) {
+      _isAdLoaded = true;
+      return SizedBox(
+        width: _adSize!.width.toDouble(),
+        height: 55,
+        child: AdWidget(ad: _bannerAd!),
+      );
+    } else {
+      return const SizedBox(height: 55);
+    }
+  }
+}
+
 
 class Carousel extends StatefulWidget {
 
@@ -281,6 +376,7 @@ class _CarouselState extends State<Carousel> {
                 return Builder(
                   builder: (context) {
                     return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) => DetailPage(mainData: data[img[1]], firebase: _firebase)
@@ -294,89 +390,87 @@ class _CarouselState extends State<Carousel> {
                           enabled: false,
                           child: SizedBox(
                             width: MediaQuery.of(context).size.width * 0.76,
-                            child: Skeleton.leaf(
-                              child: Stack(
-                                // fit: StackFit.expand,
-                                alignment: Alignment.bottomCenter,
-                                children: [
-                                  Image.network(
-                                    img[0],
-                                    fit: BoxFit.cover,
-                                    width: double.maxFinite,
-                                    height: double.maxFinite,
-                                    color: const Color.fromRGBO(0, 0, 0, 0.03),
-                                    colorBlendMode: BlendMode.multiply,
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          const Color.fromARGB(33, 0, 0, 0),
-                                          const Color.fromARGB(125, 0, 0, 0),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.fromLTRB(16, 0, 10, 22),
-                                    width: double.maxFinite,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.only(bottom: 3),
-                                          child: Text(
-                                            data[img[1]]["date"],
-                                            style: TextStyle(
-                                              fontSize: 19,
-                                              color: const Color(0xffF9F9F9),
-                                              fontVariations: <FontVariation>[
-                                                FontVariation('wght', 550),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        AutoSizeText(
-                                          data[img[1]]["title"],
-                                          maxLines: 1,
-                                          maxFontSize: 28,
-                                          style: TextStyle(
-                                            fontSize: 28,
-                                            color: const Color(0xffFDFDFD),
-                                            fontVariations: <FontVariation>[
-                                              const FontVariation('wght', 650),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          margin: EdgeInsets.only(top: 12),
-                                          padding: EdgeInsets.fromLTRB(9, 0.6, 9, 0.6),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              50,
-                                            ),
-                                            color: Colors.white,
-                                          ),
-                                          child: Text(
-                                            data[img[1]]["state"],
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black,
-                                              fontVariations: <FontVariation>[
-                                                const FontVariation('wght', 600),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
+                            child: Stack(
+                              // fit: StackFit.expand,
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Image.network(
+                                  img[0],
+                                  fit: BoxFit.cover,
+                                  width: double.maxFinite,
+                                  height: double.maxFinite,
+                                  color: const Color.fromRGBO(0, 0, 0, 0.03),
+                                  colorBlendMode: BlendMode.multiply,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        const Color.fromARGB(33, 0, 0, 0),
+                                        const Color.fromARGB(125, 0, 0, 0),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.fromLTRB(16, 0, 10, 22),
+                                  width: double.maxFinite,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(bottom: 3),
+                                        child: Text(
+                                          data[img[1]]["date"],
+                                          style: TextStyle(
+                                            fontSize: 19,
+                                            color: const Color(0xffF9F9F9),
+                                            fontVariations: <FontVariation>[
+                                              FontVariation('wght', 550),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      AutoSizeText(
+                                        data[img[1]]["title"],
+                                        maxLines: 1,
+                                        maxFontSize: 28,
+                                        style: TextStyle(
+                                          fontSize: 28,
+                                          color: const Color(0xffFDFDFD),
+                                          fontVariations: <FontVariation>[
+                                            const FontVariation('wght', 650),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(top: 12),
+                                        padding: EdgeInsets.fromLTRB(9, 0.6, 9, 0.6),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            50,
+                                          ),
+                                          color: Colors.white,
+                                        ),
+                                        child: Text(
+                                          data[img[1]]["state"],
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black,
+                                            fontVariations: <FontVariation>[
+                                              const FontVariation('wght', 600),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -386,7 +480,7 @@ class _CarouselState extends State<Carousel> {
                 );
               }).toList(),
           options: CarouselOptions(
-            height: 326,
+            height: 318,
             viewportFraction: 0.825,
             autoPlay: false,
             // autoPlayInterval: const Duration(seconds: 4),
@@ -398,7 +492,7 @@ class _CarouselState extends State<Carousel> {
           ),
         ),
         Container(
-          margin: EdgeInsets.fromLTRB(0, 14, 0, 18.5),
+          margin: EdgeInsets.fromLTRB(0, 14, 0, 26),
           child: AnimatedSmoothIndicator(
             activeIndex: _current,
             count: imgList.length,
@@ -536,7 +630,7 @@ class RecmdList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(0, 27, 0, 10),
+      margin: EdgeInsets.fromLTRB(0, 28, 0, 10),
       child: Column(
         children: [
           Container(

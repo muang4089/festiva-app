@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:festiva/home_page.dart';
 import 'package:festiva/list_page.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kakao_map_sdk/kakao_map_sdk.dart'; 
 import 'package:festiva/global_variable.dart';
 
@@ -16,6 +17,9 @@ import 'package:festiva/global_variable.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isAndroid || Platform.isIOS) {
+    await MobileAds.instance.initialize();
+  }
   await dotenv.load(fileName: "assets/config/.env");
   if (Platform.isAndroid) {
     await KakaoMapSdk.instance.initialize(dotenv.env["KAKAO_API_KEY"]!);
@@ -45,15 +49,7 @@ class _PagesState extends State<Pages> {
       _pageIndex = index; 
     });
   }
- 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-  //   systemNavigationBarColor: Colors.blue, // navigation bar color
-  //   statusBarColor: Colors.pink, // status bar color
-  // ));
-  // }
+  
   @override
   void dispose() {
     _pageController.dispose();
@@ -93,6 +89,7 @@ class _PagesState extends State<Pages> {
             // highlightColor: Colors.transparent,
           ),
           child: BottomNavigationBar(
+            elevation: 0,
             type: BottomNavigationBarType.fixed,
             backgroundColor: Color(0xffFBFBFB),
             selectedItemColor: orangeColor1,

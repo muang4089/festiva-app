@@ -170,7 +170,7 @@ class _DetailPageState extends State<DetailPage> {
                             // behavior: HitTestBehavior,
                             onTap: () {
                               showDialog(
-                                barrierColor: const Color.fromARGB(213, 20, 20, 20),
+                                barrierColor: const Color.fromARGB(216, 14, 14, 14),
                                 context: context, 
                                 builder: (context) {
                                   return Container(
@@ -211,7 +211,9 @@ class _DetailPageState extends State<DetailPage> {
                               if ((snapshot.data?["sponsor1"] ?? "").isNotEmpty)
                                 Container(
                                   margin: EdgeInsets.fromLTRB(2, 0, 0, 12.4),
-                                  child: Text("${snapshot.data?["sponsor1"]} ${!snapshot.data?["sponsor2"].trim().isEmpty ? '|' : ''} ${snapshot.data?["sponsor2"]}",style: TextStyle (
+                                  child: Text(
+                                  "${snapshot.data?["sponsor1"]} ${(!snapshot.data?["sponsor2"].trim().isEmpty && snapshot.data?["sponsor1"].trim() != snapshot.data?["sponsor2"].trim()) ? '|' : ''} ${(snapshot.data?["sponsor1"].trim() != snapshot.data?["sponsor2"].trim()) ? snapshot.data!["sponsor2"] : "" }",
+                                  style: TextStyle (
                                     fontSize: 14.5,
                                     color: Color(0xff313131),
                                     fontVariations: <FontVariation>[
@@ -342,18 +344,37 @@ class _DetailPageState extends State<DetailPage> {
                                       Expanded(
                                         child: Container(
                                           margin: EdgeInsets.fromLTRB(12, 4.2, 0, 0),
-                                          child: Text(mainData["locate_full"],style: TextStyle (
-                                            fontSize: 15.5,
-                                            color: Colors.black,
-                                            fontVariations: <FontVariation>[
-                                              const FontVariation('wght', 430),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                mainData['locate_full'],
+                                                style: TextStyle (
+                                                  fontSize: 15.5,
+                                                  color: Colors.black,
+                                                  fontVariations: <FontVariation>[
+                                                    const FontVariation('wght', 430),
+                                                  ],
+                                                )
+                                              ),
+                                              if (snapshot.data?["eventplace"].trim().isNotEmpty && !["홈페이지", "참조", "문의"].any((substring) => snapshot.data?["eventplace"].contains(substring)))
+                                              Container(
+                                                margin: EdgeInsets.only(top: 3),
+                                                child: Text(snapshot.data?["eventplace"],style: TextStyle (
+                                                  fontSize: 15.5,
+                                                  color: Colors.black,
+                                                  fontVariations: <FontVariation>[
+                                                    const FontVariation('wght', 430),
+                                                  ],
+                                                )),
+                                              ),
                                             ],
-                                          )),
+                                          ),
                                         ),
                                       )
                                     ],
                                   ),
-                                ), 
+                                ),
                               if (mainData["mapx"].isNotEmpty && mainData["mapy"].isNotEmpty)
                                 GestureDetector(
                                   onTap: () {
