@@ -496,6 +496,7 @@ class _DetailPageState extends State<DetailPage> {
           zoomLevel: 16,
           mapType: MapType.normal,
         ),
+      onMapError: (error) => printLog(error),
       onMapReady: (KakaoMapController controller) {
         printLog("KAKAO MAP complete");
         // controller.setGesture(GestureType.unknown, false);

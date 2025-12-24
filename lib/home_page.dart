@@ -6,6 +6,7 @@ import 'package:festiva/applink_handler.dart';
 import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
@@ -289,8 +290,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
     BannerAd(
       adUnitId: Platform.isAndroid
-          ? "ca-app-pub-3940256099942544/9214589741" // 테스트 ID
-          : "ca-app-pub-3940256099942544/9214589741", // 테스트 ID
+          ? dotenv.env["ADMOB_Banner_ID"].toString()
+          : "ca-app-pub-3940256099942544/9214589741",
       request: const AdRequest(),
       size: size,
       listener: BannerAdListener(

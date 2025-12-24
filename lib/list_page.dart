@@ -3,7 +3,9 @@ import 'package:festiva/detail_page.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'home_page.dart';
 
@@ -212,7 +214,8 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
       !isSearch ? getMainDataList(1, 5) : getSearchResult();
       paginationLock = true;
     }
-    printLog("$maxScroll  $currentScroll $paginationLock");
+    // printLog("$maxScroll  $currentScroll $paginationLock");
+    printLog(globalFestivals.length);
   }
 
   @override
@@ -276,10 +279,21 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
         
         SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                if (globalFestivals.isNotEmpty){
-                  return ListCard(
-                    festivaData: globalFestivals[index]
-                  );
+                if (globalFestivals.isNotEmpty){ 
+                  if(index % 8 != 0 || index == 0) {
+                    return ListCard(
+                      festivaData: globalFestivals[index]
+                    ) ;
+                  } else {
+                    return Column(
+                      children: [
+                        NativeListAd(),
+                        ListCard(
+                          festivaData: globalFestivals[index]
+                        )
+                      ],
+                    );
+                  } 
                 } else {
                   return Text("데이터가 없습니다");
                 }
@@ -423,5 +437,59 @@ class ListCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class NativeListAd extends StatefulWidget {
+  const NativeListAd({super.key});
+
+  @override
+  State<NativeListAd> createState() => _NativeListAdState();
+}
+
+class _NativeListAdState extends State<NativeListAd> {
+
+  late NativeAd _ad;
+  bool isLoaded = false;
+ 
+  @override
+  void initState() {
+    super.initState();
+ 
+    _ad = NativeAd(
+      adUnitId: dotenv.env["ADMOB_NATIVE_ID"].toString(),
+      factoryId: "adFactoryExample",
+      request: const AdRequest(),
+      listener: NativeAdListener(onAdLoaded: (ad) {
+        setState(() {
+          _ad = ad as NativeAd;
+          isLoaded = true;
+        });
+      }, onAdFailedToLoad: (ad, error) {
+        ad.dispose();
+      }),
+    );
+    _ad.load();
+  }
+ 
+  @override
+  void dispose() {
+    super.dispose();
+    _ad.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    if (isLoaded == true) {
+      return Container(
+        margin: EdgeInsets.only(top: 20),
+        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.035),
+        height: 343,
+        width: double.infinity,
+        child: AdWidget(ad: _ad),
+      );
+    } else {
+      return const SizedBox(height: 363);
+    }
   }
 }
