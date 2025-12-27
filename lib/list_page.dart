@@ -179,7 +179,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
         globalFestivals = [];
         lastdocId = "";
         printLog("get first");
-        await _firebase.collection(targetDatabases["main_db"]).orderBy("state", descending: true).orderBy("modifiedtime", descending: true).limit(5).get().then((snapshot) {
+        await _firebase.collection(targetDatabases["main_db"]).orderBy("state", descending: true).orderBy("modifiedtime", descending: true).limit(10).get().then((snapshot) {
           packagingData(snapshot);
         });
         await _firebase.collection(targetDatabases["main_db"]).count().get().then((snapshot) => {
@@ -189,7 +189,7 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
       } else {
         printLog("get more");
         var lastdoc = await _firebase.collection(targetDatabases["main_db"]).doc(lastdocId).get();
-        await _firebase.collection(targetDatabases["main_db"]).orderBy("state", descending: true).orderBy("modifiedtime", descending: true).startAfterDocument(lastdoc).limit(5).get().then((snapshot) {
+        await _firebase.collection(targetDatabases["main_db"]).orderBy("state", descending: true).orderBy("modifiedtime", descending: true).startAfterDocument(lastdoc).limit(10).get().then((snapshot) {
           packagingData(snapshot);
         });
       }
@@ -458,7 +458,8 @@ class _NativeListAdState extends State<NativeListAd> {
  
     _ad = NativeAd(
       adUnitId: dotenv.env["ADMOB_NATIVE_ID"].toString(),
-      factoryId: "adFactoryExample",
+      // adUnitId: "ca-app-pub-3940256099942544/2247696110",
+      factoryId: "listTileAd",
       request: const AdRequest(),
       listener: NativeAdListener(onAdLoaded: (ad) {
         setState(() {
@@ -482,14 +483,14 @@ class _NativeListAdState extends State<NativeListAd> {
   Widget build(BuildContext context) {
     if (isLoaded == true) {
       return Container(
-        margin: EdgeInsets.only(top: 20),
+        margin: EdgeInsets.fromLTRB(0, 15, 0, 13.5),
         padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.035),
-        height: 343,
+        height: 358,
         width: double.infinity,
         child: AdWidget(ad: _ad),
       );
     } else {
-      return const SizedBox(height: 363);
+      return const SizedBox(height: 386.5);
     }
   }
 }

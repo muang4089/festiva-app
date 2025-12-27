@@ -13,27 +13,20 @@ import io.flutter.plugins.googlemobileads.GoogleMobileAdsPlugin
 import android.widget.Button
 import android.widget.RatingBar
  
-class ListTileNativeAdFactory(val context: Context) : GoogleMobileAdsPlugin.NativeAdFactory {
+class BannerNativeAdFactory(val context: Context) : GoogleMobileAdsPlugin.NativeAdFactory {
  
     override fun createNativeAd(nativeAd: NativeAd, customOptions: MutableMap<String, Any>? ): NativeAdView {
-        val adView = LayoutInflater.from(context).inflate(R.layout.native_ad_list2, null) as NativeAdView
-
-        // Set the media view.
-        adView.mediaView = adView.findViewById(R.id.ad_media)
+        val adView = LayoutInflater.from(context).inflate(R.layout.native_ad_banner, null) as NativeAdView
 
         // Set other ad assets.
         adView.headlineView = adView.findViewById(R.id.ad_headline)
         adView.bodyView = adView.findViewById(R.id.ad_body)
         adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
         adView.iconView = adView.findViewById(R.id.ad_app_icon)
-        // adView.priceView = adView.findViewById(R.id.ad_price)
-        // adView.storeView = adView.findViewById(R.id.ad_store)
-        adView.advertiserView = adView.findViewById(R.id.ad_advertiser)
     
 
         // The headline and mediaContent are guaranteed to be in every NativeAd.
         (adView.headlineView as TextView).text = nativeAd?.headline?.replace(" ", "\u00A0");
-        adView.mediaView?.mediaContent = nativeAd?.mediaContent
 
         // These assets aren't guaranteed to be in every NativeAd, so it's important to
         // check before trying to display them.
@@ -48,7 +41,7 @@ class ListTileNativeAdFactory(val context: Context) : GoogleMobileAdsPlugin.Nati
           adView.callToActionView?.visibility = View.INVISIBLE
         } else {
           adView.callToActionView?.visibility = View.VISIBLE
-          (adView.callToActionView as Button).text = nativeAd.callToAction
+          (adView.callToActionView as Button).text = "${nativeAd.callToAction} >"
         }
 
         if (nativeAd?.icon == null) {
@@ -56,26 +49,6 @@ class ListTileNativeAdFactory(val context: Context) : GoogleMobileAdsPlugin.Nati
         } else {
           (adView.iconView as ImageView).setImageDrawable(nativeAd.icon!!.drawable)
           adView.iconView?.visibility = View.VISIBLE
-        }
-
-        // if (nativeAd?.price == null || nativeAd?.price == "") {
-        //   adView.priceView?.visibility = View.INVISIBLE
-        // } else {
-        //   adView.priceView?.visibility = View.VISIBLE
-        //   (adView.priceView as TextView).text = nativeAd.price
-        // }
-
-        // if (nativeAd?.store == null || nativeAd?.store == "") {
-        //   adView.storeView?.visibility = View.GONE
-        // } else {
-        //   adView.storeView?.visibility = View.VISIBLE
-        //   (adView.storeView as TextView).text = nativeAd.store
-        // }
-        if (nativeAd?.advertiser == null || nativeAd?.advertiser == "") {
-          adView.advertiserView?.visibility = View.GONE
-        } else {
-          adView.advertiserView?.visibility = View.VISIBLE
-          (adView.advertiserView as TextView).text = nativeAd.advertiser
         }
 
         // This method tells the Google Mobile Ads SDK that you have finished populating your

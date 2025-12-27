@@ -3,7 +3,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kakao_map_sdk/kakao_map_sdk.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -159,6 +161,7 @@ class _DetailPageState extends State<DetailPage> {
               return Column(
                 children: [
                   Container(
+                    margin: EdgeInsets.only(bottom: 6.4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.vertical(bottom: Radius.circular(14)),
                       color: Colors.white,
@@ -427,13 +430,18 @@ class _DetailPageState extends State<DetailPage> {
                       ],
                     ),
                   ),
+                  if (Platform.isAndroid || Platform.isIOS)
+                    Container(
+                      // margin: EdgeInsets.only(top: 12.8),
+                      child: NativeBannerAd()
+                    ),
                   if (snapshot.data?["info"].isNotEmpty)
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14),
                         color: Colors.white,
                       ),
-                      margin: EdgeInsets.only(top: 12.8),
+                      margin: EdgeInsets.symmetric(vertical: 6.4),
                       width: double.maxFinite,
                       child: Column(
                         children: [
@@ -456,7 +464,7 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                   if (posterImg.isNotEmpty)
                     Container(
-                      margin: EdgeInsets.only(top: 12.8),
+                      margin: EdgeInsets.symmetric(vertical: 6.4),
                       width: double.maxFinite,
                       decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
@@ -465,7 +473,7 @@ class _DetailPageState extends State<DetailPage> {
                       child: Poster(poster: posterImg,),
                     ),
                   Container(
-                    margin: EdgeInsets.only(top: 12.8),
+                    margin: EdgeInsets.symmetric(vertical: 6.4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
                       color: Colors.white,
@@ -619,6 +627,61 @@ class Poster extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class NativeBannerAd extends StatefulWidget {
+  const NativeBannerAd({super.key});
+
+  @override
+  State<NativeBannerAd> createState() => _NativeListAdState();
+}
+
+class _NativeListAdState extends State<NativeBannerAd> {
+
+  late NativeAd _ad;
+  bool isLoaded = false;
+ 
+  @override
+  void initState() {
+    super.initState();
+ 
+    _ad = NativeAd(
+      // adUnitId: dotenv.env["ADMOB_NATIVE_ID"].toString(),
+      adUnitId: "ca-app-pub-3940256099942544/2247696110",
+      factoryId: "bannerAd",
+      request: const AdRequest(),
+      listener: NativeAdListener(onAdLoaded: (ad) {
+        setState(() {
+          _ad = ad as NativeAd;
+          isLoaded = true;
+        });
+      }, onAdFailedToLoad: (ad, error) {
+        ad.dispose();
+      }),
+    );
+    _ad.load();
+  }
+ 
+  @override
+  void dispose() {
+    super.dispose();
+    _ad.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    if (isLoaded == true) {
+      return Container(
+        // margin: EdgeInsets.only(top: 15),
+        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.034),
+        height: 71,
+        width: double.infinity,
+        child: AdWidget(ad: _ad),
+      );
+    } else {
+      return const SizedBox(height: 0);
+    }
   }
 }
 

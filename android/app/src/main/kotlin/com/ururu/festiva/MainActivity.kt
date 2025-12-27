@@ -11,13 +11,19 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
  
         GoogleMobileAdsPlugin.registerNativeAdFactory(
-            flutterEngine, "adFactoryExample", ListTileNativeAdFactory(context)
+            flutterEngine, "listTileAd", ListTileNativeAdFactory(context)
         )
+
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+            flutterEngine, "bannerAd", BannerNativeAdFactory(context)
+        )
+        
     }
  
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         super.cleanUpFlutterEngine(flutterEngine)
  
-        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "adFactoryExample")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "listTileAd")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "bannerAd")
     }
 }

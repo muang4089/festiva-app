@@ -23,7 +23,7 @@ void main() async {
   await dotenv.load(fileName: "assets/config/.env");
   if (Platform.isAndroid) {
     await KakaoMapSdk.instance.initialize(dotenv.env["KAKAO_API_KEY"]!);
-    // debugPrint(await KakaoMapSdk.instance.hashKey());
+    print("${await KakaoMapSdk.instance.hashKey()} muangtest");
   }
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

@@ -223,7 +223,8 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                         child: Carousel(data: snapshot.data?["carousel_list"]),
                       ),
                       if (Platform.isAndroid || Platform.isIOS)
-                        BannerAdWidget(),
+                        NativeBannerAd(),
+                        // NativeBanner(),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.882,
                         child: ListView.builder(
@@ -251,90 +252,57 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
   }
 }
 
-class BannerAdWidget extends StatefulWidget {
-  const BannerAdWidget({super.key});
+class NativeBannerAd extends StatefulWidget {
+  const NativeBannerAd({super.key});
 
   @override
-  State<BannerAdWidget> createState() => _BannerAdWidgetState();
+  State<NativeBannerAd> createState() => _NativeListAdState();
 }
 
-class _BannerAdWidgetState extends State<BannerAdWidget> {
-  BannerAd? _bannerAd;
-  AdSize? _adSize;
-  bool _isAdLoaded = false;
+class _NativeListAdState extends State<NativeBannerAd> {
 
+  late NativeAd _ad;
+  bool isLoaded = false;
+ 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final availableWidth = MediaQuery.sizeOf(context).width * 0.882;
-    _isAdLoaded = false;
-    _loadAd(availableWidth);
-  }
-
-
-  void _loadAd(double availableWidth) {
-    // 현재 위젯의 너비를 가져옵니다.
-    // final availableWidth = MediaQuery.sizeOf(context).width * 0.882;
-    var size = AdSize.getInlineAdaptiveBannerAdSize(availableWidth.truncate(), 55);
-    _bannerAd?.dispose();
-    _bannerAd = null;
-
-    if (size == null) {
-      return;
-    }
-
-    // 이미 로드된 광고가 있고 사이즈가 같다면 다시 로드하지 않습니다.
-    if (_bannerAd != null && _adSize == size) {
-      return;
-    }
-
-    BannerAd(
-      adUnitId: Platform.isAndroid
-          ? dotenv.env["ADMOB_Banner_ID"].toString()
-          : "ca-app-pub-3940256099942544/9214589741",
+  void initState() {
+    super.initState();
+ 
+    _ad = NativeAd(
+      adUnitId: dotenv.env["ADMOB_NATIVE_ID"].toString(),
+      // adUnitId: "ca-app-pub-3940256099942544/2247696110",
+      factoryId: "bannerAd",
       request: const AdRequest(),
-      size: size,
-      listener: BannerAdListener(
-        onAdLoaded: (Ad ad) {
-          if (mounted) {
-            _bannerAd?.dispose();
-            _bannerAd = null;
-            setState(() {
-              _adSize = size;
-              _bannerAd = (ad as BannerAd);
-              printLog("load");
-            });
-          }
-        },
-        onAdFailedToLoad: (ad, err) {
-          debugPrint("BannerAd failed to load: $err");
-          printLog(size.width);
-          printLog("dispose");
-          ad.dispose();
-        },
-      ),
-    ).load();
+      listener: NativeAdListener(onAdLoaded: (ad) {
+        setState(() {
+          _ad = ad as NativeAd;
+          isLoaded = true;
+        });
+      }, onAdFailedToLoad: (ad, error) {
+        ad.dispose();
+      }),
+    );
+    _ad.load();
   }
-
+ 
   @override
   void dispose() {
-    _isAdLoaded = false;
-    _bannerAd?.dispose();
-    _bannerAd = null;
     super.dispose();
+    _ad.dispose();
   }
-
+  
   @override
   Widget build(BuildContext context) {
-    if (_bannerAd != null && _adSize != null && !_isAdLoaded) {
-      _isAdLoaded = true;
-      return SizedBox(
-        width: _adSize!.width.toDouble(),
-        height: 55,
-        child: AdWidget(ad: _bannerAd!),
+    if (isLoaded == true) {
+      return Container(
+        // margin: EdgeInsets.only(top: 15),
+        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.04),
+        height: 71,
+        width: double.infinity,
+        child: AdWidget(ad: _ad),
       );
     } else {
-      return const SizedBox(height: 55);
+      return const SizedBox(height: 4);
     }
   }
 }
@@ -481,7 +449,7 @@ class _CarouselState extends State<Carousel> {
                 );
               }).toList(),
           options: CarouselOptions(
-            height: 318,
+            height: 320,
             viewportFraction: 0.825,
             autoPlay: false,
             // autoPlayInterval: const Duration(seconds: 4),
@@ -631,7 +599,7 @@ class RecmdList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(0, 28, 0, 10),
+      margin: EdgeInsets.fromLTRB(0, 23.5, 0, 10),
       child: Column(
         children: [
           Container(
