@@ -45,7 +45,7 @@ class BannerNativeAdFactory(val context: Context) : GoogleMobileAdsPlugin.Native
         }
 
         if (nativeAd?.icon == null) {
-          adView.iconView?.visibility = View.INVISIBLE
+          adView.iconView?.visibility = View.GONE
         } else {
           (adView.iconView as ImageView).setImageDrawable(nativeAd.icon!!.drawable)
           adView.iconView?.visibility = View.VISIBLE

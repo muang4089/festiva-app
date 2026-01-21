@@ -25,6 +25,7 @@
         <com.google.android.gms.ads.nativead.MediaView
             android:id="@+id/ad_media"
             android:layout_width="match_parent"
+            android:padding="1.3dp"
             android:layout_height="198dp"
             android:layout_gravity="center_horizontal"
             android:clipToOutline="true"
