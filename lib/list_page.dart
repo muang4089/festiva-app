@@ -287,7 +287,8 @@ class _ListPageState extends State<ListPage> with AutomaticKeepAliveClientMixin<
                   } else {
                     return Column(
                       children: [
-                        NativeListAd(),
+                        if (isAD)
+                          NativeListAd(),
                         ListCard(
                           festivaData: globalFestivals[index]
                         )
@@ -457,8 +458,7 @@ class _NativeListAdState extends State<NativeListAd> {
     super.initState();
  
     _ad = NativeAd(
-      adUnitId: dotenv.env["ADMOB_NATIVE_ID"].toString(),
-      // adUnitId: "ca-app-pub-3940256099942544/2247696110",
+      adUnitId: isTestAD ? dotenv.env["ADMOB_NATIVE_ID_TEST"].toString() : dotenv.env["ADMOB_NATIVE_ID"].toString(),
       factoryId: "listTileAd",
       request: const AdRequest(),
       listener: NativeAdListener(onAdLoaded: (ad) {

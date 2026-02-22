@@ -1,6 +1,6 @@
-package com.ururu.festiva
+package com.muang.festiva
  
-import com.ururu.festiva.R
+import com.muang.festiva.R
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View

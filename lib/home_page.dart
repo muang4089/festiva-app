@@ -24,6 +24,10 @@ Map targetDatabases = {
   "carousel_db": ""
 };
 
+bool isAD = true;
+bool isTestAD = false;
+
+
 void printLog(e) {
   debugPrint(e.toString());
 }
@@ -86,7 +90,10 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
       targetDatabases["titles_db"] = "titles_${snapshot.data()?['titles']}";
       targetDatabases["carousel_db"] = "Carousel_list_${snapshot.data()?['carousel']}";
       targetDatabases["recommend_db"] = "Recommended_festivals_${snapshot.data()?['recommend']}";
+      isAD = snapshot.data()?['ad'];
+      isTestAD = snapshot.data()?['testAD'];
       printLog(targetDatabases);
+      printLog(isAD);
     });
     return getRecmdData();
   }
@@ -222,8 +229,10 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                         margin: EdgeInsets.only(top: 7),
                         child: Carousel(data: snapshot.data?["carousel_list"]),
                       ),
+                      // Text(testas),
                       if (Platform.isAndroid || Platform.isIOS)
-                        NativeBannerAd(),
+                        if (isAD)
+                          NativeBannerAd(),
                         // NativeBanner(),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.882,
@@ -269,8 +278,7 @@ class _NativeListAdState extends State<NativeBannerAd> {
     super.initState();
  
     _ad = NativeAd(
-      adUnitId: dotenv.env["ADMOB_NATIVE_ID"].toString(),
-      // adUnitId: "ca-app-pub-3940256099942544/2247696110",
+      adUnitId: isTestAD ? dotenv.env["ADMOB_NATIVE_ID_TEST"].toString() : dotenv.env["ADMOB_NATIVE_ID"].toString(),
       factoryId: "bannerAd",
       request: const AdRequest(),
       listener: NativeAdListener(onAdLoaded: (ad) {

@@ -431,10 +431,8 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                   ),
                   if (Platform.isAndroid || Platform.isIOS)
-                    Container(
-                      // margin: EdgeInsets.only(top: 12.8),
-                      child: NativeBannerAd()
-                    ),
+                    if (isAD)
+                      NativeBannerAd(),
                   if (snapshot.data?["info"].isNotEmpty)
                     Container(
                       decoration: BoxDecoration(
@@ -647,8 +645,7 @@ class _NativeListAdState extends State<NativeBannerAd> {
     super.initState();
  
     _ad = NativeAd(
-      // adUnitId: dotenv.env["ADMOB_NATIVE_ID"].toString(),
-      adUnitId: "ca-app-pub-3940256099942544/2247696110",
+      adUnitId: isTestAD ? dotenv.env["ADMOB_NATIVE_ID_TEST"].toString() : dotenv.env["ADMOB_NATIVE_ID"].toString(),
       factoryId: "bannerAd",
       request: const AdRequest(),
       listener: NativeAdListener(onAdLoaded: (ad) {

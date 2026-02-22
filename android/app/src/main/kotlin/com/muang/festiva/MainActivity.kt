@@ -1,8 +1,8 @@
-package com.ururu.festiva
+package com.muang.festiva
 
 import io.flutter.embedding.android.FlutterActivity
 
-import com.ururu.festiva.ListTileNativeAdFactory
+import com.muang.festiva.ListTileNativeAdFactory
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugins.googlemobileads.GoogleMobileAdsPlugin
 
