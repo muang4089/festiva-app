@@ -14,7 +14,7 @@ import 'package:kakao_map_sdk/kakao_map_sdk.dart';
 import 'package:festiva/global_variable.dart';
 
 
-String testas = "d";
+String hashKey = "";
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isAndroid || Platform.isIOS) {
@@ -23,7 +23,7 @@ void main() async {
   await dotenv.load(fileName: "assets/config/.env");
   if (Platform.isAndroid) {
     await KakaoMapSdk.instance.initialize(dotenv.env["KAKAO_API_KEY"]!);
-    // testas = (await KakaoMapSdk.instance.hashKey())!;
+    hashKey = (await KakaoMapSdk.instance.hashKey())!;
   } else if (Platform.isIOS) {
     // print("${await KakaoMapSdk.instance.hashKey()} muangtest");
   }

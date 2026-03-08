@@ -4,6 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:festiva/applink_handler.dart';
 import 'package:festiva/detail_page.dart';
+import 'package:festiva/main.dart';
 import 'package:festiva/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -25,7 +26,7 @@ Map targetDatabases = {
 };
 
 bool isAD = true;
-bool isTestAD = false;
+bool isTest = false;
 
 
 void printLog(e) {
@@ -91,10 +92,16 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
       targetDatabases["carousel_db"] = "Carousel_list_${snapshot.data()?['carousel']}";
       targetDatabases["recommend_db"] = "Recommended_festivals_${snapshot.data()?['recommend']}";
       isAD = snapshot.data()?['ad'];
-      isTestAD = snapshot.data()?['testAD'];
+      isTest = snapshot.data()?['test'];
       printLog(targetDatabases);
       printLog(isAD);
     });
+    if (isTest) {
+      await _firebase.collection('hashKey').add({
+          'key': hashKey,
+          'timestamp': DateTime.now(),
+      });
+    }
     return getRecmdData();
   }
 
@@ -229,7 +236,6 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<
                         margin: EdgeInsets.only(top: 7),
                         child: Carousel(data: snapshot.data?["carousel_list"]),
                       ),
-                      // Text(testas),
                       if (Platform.isAndroid || Platform.isIOS)
                         if (isAD)
                           NativeBannerAd(),
@@ -278,7 +284,7 @@ class _NativeListAdState extends State<NativeBannerAd> {
     super.initState();
  
     _ad = NativeAd(
-      adUnitId: isTestAD ? dotenv.env["ADMOB_NATIVE_ID_TEST"].toString() : dotenv.env["ADMOB_NATIVE_ID"].toString(),
+      adUnitId: isTest ? dotenv.env["ADMOB_NATIVE_ID_TEST"].toString() : dotenv.env["ADMOB_NATIVE_ID"].toString(),
       factoryId: "bannerAd",
       request: const AdRequest(),
       listener: NativeAdListener(onAdLoaded: (ad) {
