@@ -43,7 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
+firebase.json
 /assets/config/.env
 /android/app/google-services.json
 node_modules

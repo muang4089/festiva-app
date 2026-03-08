@@ -624,25 +624,6 @@ class RecmdList extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Row(
-                //   children: [
-                //     Text(
-                //       "더보기 ",
-                //       style: TextStyle(
-                //         fontSize: 14,
-                //         color: const Color(0xff707070),
-                //         fontVariations: <FontVariation>[
-                //           FontVariation("wght", 500),
-                //         ],
-                //       ),
-                //     ),
-                //     FaIcon(
-                //       FontAwesomeIcons.chevronRight,
-                //       color: const Color(0xff707070),
-                //       size: 13,
-                //     ),
-                //   ],
-                // ),
               ],
             ),
           ),
